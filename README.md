@@ -42,7 +42,7 @@ Choose a dataset (10000+ data points) that interests you — it should include a
 |---|---|
 | **Dataset source** | [Spotify Tracks Dataset](https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset)|
 | **Primary resource (CRUD)** | Tracks (track_id, track_name, artists, album_name, track_genre, duration_ms, popularity, key, explicit, tempo, danceability, energy, acousticness, instrumentalness)|
-| **Secondary resource 1 (read-only)** | Albums (album_id, album_name, artists, total_tracks) |
+| **Secondary resource 1 (read-only)** | Albums (album_id, album_name, total_tracks) |
 | **Secondary resource 2 (read-only)** | Artists (artist_id, artist_name, genres, total_tracks, average_popularity) |
 
 
