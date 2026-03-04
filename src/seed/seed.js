@@ -1,29 +1,29 @@
 import fs from "fs";
 import csv from "csv-parser";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
-
-import Track from "../models/Track.js";
-import Album from "../models/Album.js";
-import Artist from "../models/Artist.js";
+import pkg from "pg";
 
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI;
+const { Pool } = pkg;
 
-await mongoose.connect(MONGO_URI);
-console.log("MongoDB connected ✅");
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+console.log("PostgreSQL connected ✅");
 
 // Rensa databasen först
-await Track.deleteMany({});
-await Album.deleteMany({});
-await Artist.deleteMany({});
-console.log("Collections cleared ✅");
+await pool.query("DELETE FROM track_artists");
+await pool.query("DELETE FROM tracks");
+await pool.query("DELETE FROM artists");
+await pool.query("DELETE FROM albums");
 
-// Maps för unika album och artists
-const albumMap = new Map();  // nyckel: album_name
-const artistMap = new Map(); // nyckel: artist_name
+console.log("Tables cleared ✅");
+
+const albumMap = new Map();
+const artistMap = new Map();
 const tracks = [];
 
 const csvFilePath = "./data/spotify_dataset.csv";
@@ -31,96 +31,141 @@ const csvFilePath = "./data/spotify_dataset.csv";
 fs.createReadStream(csvFilePath)
   .pipe(csv())
   .on("data", (row) => {
-    // --- Track ---
+    const trackId = uuidv4();
+
     const track = {
-      track_id: row.track_id || uuidv4(),
+      id: trackId,
       track_name: row.track_name,
-      artists: [],      // kommer fyllas med artist_ids
-      album_id: null,   // kommer fyllas med album_id
       album_name: row.album_name,
       track_genre: row.track_genre,
       duration_ms: parseInt(row.duration_ms) || 0,
       popularity: parseInt(row.popularity) || 0,
       key: parseInt(row.key) || -1,
-      explicit: row.explicit.toLowerCase() === "true",
+      explicit: row.explicit?.toLowerCase() === "true",
       tempo: parseFloat(row.tempo) || 0,
       danceability: parseFloat(row.danceability) || 0,
       energy: parseFloat(row.energy) || 0,
       acousticness: parseFloat(row.acousticness) || 0,
       instrumentalness: parseFloat(row.instrumentalness) || 0,
+      artists: [],
     };
 
-    // --- Artists ---
     const artistNames = row.artists
       .split(";")
-      .map(a => a.trim())
+      .map((a) => a.trim())
       .filter(Boolean);
 
-    const artistIds = [];
-
     artistNames.forEach((artistName) => {
-      let artist;
       if (!artistMap.has(artistName)) {
-        artist = new Artist({
-          artist_id: uuidv4(),
+        artistMap.set(artistName, {
+          id: uuidv4(),
           artist_name: artistName,
           genres: row.track_genre ? [row.track_genre] : [],
           total_tracks: 1,
-          average_popularity: parseFloat(row.popularity),
+          average_popularity: parseFloat(row.popularity) || 0,
         });
-        artistMap.set(artistName, artist);
       } else {
-        artist = artistMap.get(artistName);
+        const artist = artistMap.get(artistName);
         artist.total_tracks += 1;
+
         artist.average_popularity =
-          (artist.average_popularity * (artist.total_tracks - 1) + parseFloat(row.popularity)) /
+          (artist.average_popularity * (artist.total_tracks - 1) +
+            parseFloat(row.popularity || 0)) /
           artist.total_tracks;
 
-        if (row.track_genre && !artist.genres.includes(row.track_genre)) {
+        if (
+          row.track_genre &&
+          !artist.genres.includes(row.track_genre)
+        ) {
           artist.genres.push(row.track_genre);
         }
       }
-      artistIds.push(artist.artist_id);
-      track.artists.push(artist.artist_id);
+
+      track.artists.push(artistMap.get(artistName).id);
     });
 
-    // --- Album (unik per album_name) ---
-    const albumKey = row.album_name;
-    let album;
-    if (!albumMap.has(albumKey)) {
-      album = new Album({
-        album_id: uuidv4(),
+    if (!albumMap.has(row.album_name)) {
+      albumMap.set(row.album_name, {
+        id: uuidv4(),
         album_name: row.album_name,
         total_tracks: 1,
       });
-      albumMap.set(albumKey, album);
     } else {
-      album = albumMap.get(albumKey);
-      album.total_tracks += 1;
+      albumMap.get(row.album_name).total_tracks += 1;
     }
 
-    track.album_id = album.album_id;
+    track.album_id = albumMap.get(row.album_name).id;
+
     tracks.push(track);
   })
   .on("end", async () => {
-    console.log(`CSV file processed ✅`);
-    console.log(`Tracks collected: ${tracks.length}`);
-    console.log(`Albums collected: ${albumMap.size}`);
-    console.log(`Artists collected: ${artistMap.size}`);
+    console.log("CSV processed ✅");
 
     try {
-      // Spara allt i DB
-      await Album.insertMany(Array.from(albumMap.values()));
-      await Artist.insertMany(Array.from(artistMap.values()));
-      await Track.insertMany(tracks);
+      for (const album of albumMap.values()) {
+        await pool.query(
+          `INSERT INTO albums (id, album_name, total_tracks)
+           VALUES ($1, $2, $3)`,
+          [album.id, album.album_name, album.total_tracks]
+        );
+      }
 
-      console.log("✅ Seed finished! Database populated:");
-      console.log(`Tracks inserted: ${tracks.length}`);
-      console.log(`Albums inserted: ${albumMap.size}`);
-      console.log(`Artists inserted: ${artistMap.size}`);
+      for (const artist of artistMap.values()) {
+        await pool.query(
+          `INSERT INTO artists (id, artist_name, genres, total_tracks, average_popularity)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [
+            artist.id,
+            artist.artist_name,
+            artist.genres,
+            artist.total_tracks,
+            artist.average_popularity,
+          ]
+        );
+      }
+
+      for (const track of tracks) {
+        await pool.query(
+          `INSERT INTO tracks (
+            id, track_name, album_id, track_genre,
+            duration_ms, popularity, key, explicit,
+            tempo, danceability, energy,
+            acousticness, instrumentalness
+          )
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+          [
+            track.id,
+            track.track_name,
+            track.album_id,
+            track.track_genre,
+            track.duration_ms,
+            track.popularity,
+            track.key,
+            track.explicit,
+            track.tempo,
+            track.danceability,
+            track.energy,
+            track.acousticness,
+            track.instrumentalness,
+          ]
+        );
+
+        for (const artistId of track.artists) {
+          await pool.query(
+            `INSERT INTO track_artists (track_id, artist_id)
+             VALUES ($1, $2)`,
+            [track.id, artistId]
+          );
+        }
+      }
+
+      console.log("✅ Seed finished!");
+      console.log(`Tracks: ${tracks.length}`);
+      console.log(`Albums: ${albumMap.size}`);
+      console.log(`Artists: ${artistMap.size}`);
     } catch (err) {
-      console.error("Error seeding database:", err);
+      console.error("Seeding error ❌", err);
     } finally {
-      mongoose.connection.close();
+      await pool.end();
     }
   });
