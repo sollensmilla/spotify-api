@@ -14,7 +14,6 @@ const pool = new Pool({
 
 console.log("PostgreSQL connected ✅");
 
-// Rensa databasen först
 await pool.query("DELETE FROM track_artists");
 await pool.query("DELETE FROM tracks");
 await pool.query("DELETE FROM artists");
