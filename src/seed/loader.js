@@ -22,7 +22,7 @@ export async function loadData({ albums, artists, tracks }) {
     await bulkInsert(
         pool,
         "artists",
-        ["id", "artist_name"],
+        ["id", "artist_name", "genres", "total_tracks", "average_popularity"],
         artists
     );
 
@@ -36,7 +36,14 @@ export async function loadData({ albums, artists, tracks }) {
             "album_id",
             "track_genre",
             "duration_ms",
-            "popularity"
+            "popularity",
+            "key",
+            "explicit",
+            "tempo",
+            "danceability",
+            "energy",
+            "acousticness",
+            "instrumentalness"
         ],
         tracks
     );
