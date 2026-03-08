@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { ApolloServer } from "apollo-server-express";
+import { connectGraphQL } from "./config/connectGraphQL.js";
 import { connectDB } from "./config/connectDB.js";
 
 dotenv.config();
@@ -10,25 +10,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const typeDefs = `#graphql
-  type Query {
-    hello: String
-  }
-`;
-
-const resolvers = {
-  Query: {
-    hello: () => "Spotify API is running 🚀"
-  }
-};
-
 async function startServer() {
 
   await connectDB();
 
-  const server = new ApolloServer({ typeDefs, resolvers });
-  await server.start();
-  server.applyMiddleware({ app });
+  const server = await connectGraphQL(app);
 
   const PORT = process.env.PORT || 4000;
 
