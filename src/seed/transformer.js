@@ -64,20 +64,19 @@ export function transformData(rows) {
             track.artists.push(artistMap.get(artistName).id);
         });
 
-        if (!albumMap.has(row.album_name)) {
+        const albumKey = `${row.album_name}-${row.artists}`;
 
-            albumMap.set(row.album_name, {
+        if (!albumMap.has(albumKey)) {
+            albumMap.set(albumKey, {
                 id: uuidv4(),
                 album_name: row.album_name,
                 total_tracks: 1
             });
-
         } else {
-
-            albumMap.get(row.album_name).total_tracks++;
+            albumMap.get(albumKey).total_tracks++;
         }
 
-        track.album_id = albumMap.get(row.album_name).id;
+        track.album_id = albumMap.get(albumKey).id;
 
         tracks.push(track);
     });
