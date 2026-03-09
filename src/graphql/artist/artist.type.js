@@ -11,8 +11,15 @@ export const artistType = gql`
     tracks: [Track!]
   }
 
+  type ArtistPage {
+  total: Int!
+  limit: Int!
+  offset: Int!
+  items: [Artist!]!
+  }
+
   extend type Query {
-    artists(limit: Int, offset: Int): [Artist!]!
+    artists(limit: Int, offset: Int): ArtistPage!
     artist(id: ID!): Artist
   }
 

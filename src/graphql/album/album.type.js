@@ -10,8 +10,15 @@ export const albumType = gql`
     artists: [Artist!]
   }
 
+  type AlbumPage {
+  total: Int!
+  limit: Int!
+  offset: Int!
+  items: [Album!]!
+ }
+
   extend type Query {
-    albums(limit: Int, offset: Int): [Album!]!
+    albums(limit: Int, offset: Int): AlbumPage!
     album(id: ID!): Album
   }
 

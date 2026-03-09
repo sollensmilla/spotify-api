@@ -5,6 +5,8 @@ export const albumResolver = {
     Query: {
 
         albums: async (_, { limit = 20, offset = 0 }) => {
+            const totalRes = await pool.query(`SELECT COUNT(*) FROM albums`);
+            const total = parseInt(totalRes.rows[0].count, 10);
 
             const res = await pool.query(
                 `SELECT * FROM albums
@@ -12,7 +14,12 @@ export const albumResolver = {
                 [limit, offset]
             );
 
-            return res.rows;
+            return {
+                total,
+                limit,
+                offset,
+                items: res.rows
+            };
         },
 
         album: async (_, { id }) => {
