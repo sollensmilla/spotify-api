@@ -7,6 +7,10 @@ const rootQuery = gql`
   type Query {
     _empty: String
   }
+
+    type Mutation {
+    _empty: String
+  }
 `;
 
 export const typeDefs = [rootQuery, trackType, albumType, artistType];

@@ -8,6 +8,10 @@ export const resolvers = {
         ...albumResolver.Query,
         ...artistResolver.Query
     },
+
+    Mutation: {
+        ...trackResolver.Mutation
+    },
     Track: {
         ...trackResolver.Track
     },

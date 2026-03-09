@@ -38,4 +38,21 @@ extend type Query {
   ): TrackPage!
   track(id: ID!): Track
 }
+
+extend type Mutation {
+  addTrack(
+    track_name: String!
+    album_id: ID
+    genre: String
+    popularity: Int
+  ): Track!
+
+  updateTrack(
+    id: ID!
+    track_name: String
+    popularity: Int
+  ): Track!
+
+  deleteTrack(id: ID!): Boolean!
+}
 `;
