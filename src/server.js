@@ -11,18 +11,21 @@ app.use(cors());
 app.use(express.json());
 
 async function startServer() {
+  try {
 
-  await connectDB();
+    await connectDB();
 
-  const server = await connectGraphQL(app);
+    const server = await connectGraphQL(app);
 
-  const PORT = process.env.PORT || 4000;
+    const PORT = process.env.PORT || 4000;
 
-  app.listen(PORT, () =>
-    console.log(
-      `Server running on http://localhost:${PORT}${server.graphqlPath}`
-    )
-  );
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}${server.graphqlPath}`);
+    });
+
+  } catch (err) {
+    console.error("Server startup error:", err);
+  }
 }
 
 startServer();
