@@ -18,8 +18,24 @@ export const trackType = gql`
     instrumentalness: Float
   }
 
-  extend type Query {
-    tracks(limit: Int): [Track!]!
-    track(id: ID!): Track
+  type TrackPage {
+    total: Int!
+    limit: Int!
+    offset: Int!
+    items: [Track!]!
   }
+
+extend type Query {
+  tracks(
+    name: String
+    genre: String
+    minPopularity: Int
+    minDanceability: Float
+    minEnergy: Float
+    minAcousticness: Float
+    limit: Int
+    offset: Int
+  ): TrackPage!
+  track(id: ID!): Track
+}
 `;
