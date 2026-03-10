@@ -17,7 +17,13 @@ export const connectGraphQL = async (app) => {
                 albumLoader,
                 artistLoader
             }
-        })
+        }),
+        formatError: (err) => {
+            return {
+                error: err.message
+            };
+        }
+
     });
 
     await server.start();

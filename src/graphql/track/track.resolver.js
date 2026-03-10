@@ -3,7 +3,6 @@ import { pool } from "../../config/connectDB.js";
 export const trackResolver = {
 
     Query: {
-
         tracks: async (_, args) => {
             const {
                 name,
@@ -67,67 +66,101 @@ export const trackResolver = {
         },
 
         track: async (_, { id }) => {
-            const res = await pool.query(
-                `SELECT * FROM tracks WHERE id=$1`,
-                [id]
-            );
-            return res.rows[0];
-        }
+            try {
+                const res = await pool.query(
+                    `SELECT * FROM tracks WHERE id=$1`,
+                    [id]
+                );
 
+                if (!res.rows[0]) {
+                    throw new Error("Track not found");
+                }
+
+                return res.rows[0];
+            } catch (err) {
+                throw new Error("Database query failed");
+            }
+        },
     },
 
     Mutation: {
-
         addTrack: async (_, args) => {
 
-            const res = await pool.query(
-                `INSERT INTO tracks (track_name, album_id, track_genre, popularity)
+            if (!args.track_name) {
+                throw new Error("track_name is required");
+            }
+
+            if (!args.album_id) {
+                throw new Error("album_id is required");
+            }
+
+            try {
+                const res = await pool.query(
+                    `INSERT INTO tracks (track_name, album_id, track_genre, popularity)
          VALUES ($1,$2,$3,$4)
          RETURNING *`,
-                [
-                    args.track_name,
-                    args.album_id,
-                    args.genre,
-                    args.popularity
-                ]
-            );
+                    [
+                        args.track_name,
+                        args.album_id,
+                        args.genre,
+                        args.popularity
+                    ]
+                );
 
-            return res.rows[0];
+                return res.rows[0];
+
+            } catch (err) {
+                throw new Error("Failed to create track");
+            }
         },
 
         updateTrack: async (_, { id, ...fields }) => {
+            try {
+                const keys = Object.keys(fields);
 
-            const keys = Object.keys(fields);
+                const set = keys.map((k, i) => `${k}=$${i + 2}`).join(", ");
 
-            const set = keys.map((k, i) => `${k}=$${i + 2}`).join(", ");
+                const values = [id, ...Object.values(fields)];
 
-            const values = [id, ...Object.values(fields)];
-
-            const res = await pool.query(
-                `UPDATE tracks
+                const res = await pool.query(
+                    `UPDATE tracks
          SET ${set}
          WHERE id=$1
          RETURNING *`,
-                values
-            );
+                    values
+                );
 
-            return res.rows[0];
+                if (!res.rows[0]) {
+                    throw new Error("Track not found");
+                }
+
+                return res.rows[0];
+            } catch (err) {
+                throw new Error("Failed to update track");
+            }
         },
 
         deleteTrack: async (_, { id }) => {
+            try {
+                const res = await pool.query(
+                    `DELETE FROM tracks WHERE id=$1 RETURNING *`,
+                    [id]
+                );
 
-            await pool.query(
-                `DELETE FROM tracks WHERE id=$1`,
-                [id]
-            );
+                if (!res.rows[0]) {
+                    throw new Error("Track not found");
+                }
 
-            return true;
-        }
-
+                return {
+                    message: "Track deleted successfully"
+                };
+            } catch (err) {
+                throw new Error("Failed to delete track");
+            }
+        },
     },
 
     Track: {
-
         album: async (track, _, { loaders }) => {
             return loaders.albumLoader.load(track.album_id);
         },
@@ -137,5 +170,4 @@ export const trackResolver = {
         }
 
     }
-
 };
