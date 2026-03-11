@@ -1,8 +1,10 @@
 import { pool } from "../../config/connectDB.js";
+import { requireRow } from "../../utils/requireRow.js";
 
 export const trackResolver = {
 
     Query: {
+
         tracks: async (_, args) => {
             const {
                 name,
@@ -48,12 +50,18 @@ export const trackResolver = {
                 baseQuery += ` AND acousticness >= $${values.length}`;
             }
 
-            const totalRes = await pool.query(`SELECT COUNT(*) FROM (${baseQuery}) AS subquery`, values);
+            const totalRes = await pool.query(
+                `SELECT COUNT(*) FROM (${baseQuery}) AS filtered`,
+                values
+            );
+
             const total = parseInt(totalRes.rows[0].count, 10);
 
             values.push(limit);
             values.push(offset);
-            const paginatedQuery = `${baseQuery} LIMIT $${values.length - 1} OFFSET $${values.length}`;
+
+            const paginatedQuery =
+                `${baseQuery} LIMIT $${values.length - 1} OFFSET $${values.length}`;
 
             const res = await pool.query(paginatedQuery, values);
 
@@ -66,24 +74,17 @@ export const trackResolver = {
         },
 
         track: async (_, { id }) => {
-            try {
-                const res = await pool.query(
-                    `SELECT * FROM tracks WHERE id=$1`,
-                    [id]
-                );
+            const res = await pool.query(
+                `SELECT * FROM tracks WHERE id=$1`,
+                [id]
+            );
 
-                if (!res.rows[0]) {
-                    throw new Error("Track not found");
-                }
-
-                return res.rows[0];
-            } catch (err) {
-                throw new Error("Database query failed");
-            }
+            return requireRow(res, "Track not found");
         },
     },
 
     Mutation: {
+
         addTrack: async (_, args) => {
 
             if (!args.track_name) {
@@ -94,80 +95,62 @@ export const trackResolver = {
                 throw new Error("album_id is required");
             }
 
-            try {
-                const res = await pool.query(
-                    `INSERT INTO tracks (track_name, album_id, track_genre, popularity)
+            const res = await pool.query(
+                `INSERT INTO tracks (track_name, album_id, track_genre, popularity)
          VALUES ($1,$2,$3,$4)
          RETURNING *`,
-                    [
-                        args.track_name,
-                        args.album_id,
-                        args.genre,
-                        args.popularity
-                    ]
-                );
+                [
+                    args.track_name,
+                    args.album_id,
+                    args.genre,
+                    args.popularity
+                ]
+            );
 
-                return res.rows[0];
-
-            } catch (err) {
-                throw new Error("Failed to create track");
-            }
+            return res.rows[0];
         },
 
         updateTrack: async (_, { id, ...fields }) => {
-            try {
-                const keys = Object.keys(fields);
 
-                const set = keys.map((k, i) => `${k}=$${i + 2}`).join(", ");
+            const keys = Object.keys(fields);
 
-                const values = [id, ...Object.values(fields)];
+            const set = keys
+                .map((k, i) => `${k}=$${i + 2}`)
+                .join(", ");
 
-                const res = await pool.query(
-                    `UPDATE tracks
+            const values = [id, ...Object.values(fields)];
+
+            const res = await pool.query(
+                `UPDATE tracks
          SET ${set}
          WHERE id=$1
          RETURNING *`,
-                    values
-                );
+                values
+            );
 
-                if (!res.rows[0]) {
-                    throw new Error("Track not found");
-                }
-
-                return res.rows[0];
-            } catch (err) {
-                throw new Error("Failed to update track");
-            }
+            return requireRow(res, "Track not found");
         },
 
         deleteTrack: async (_, { id }) => {
-            try {
-                const res = await pool.query(
-                    `DELETE FROM tracks WHERE id=$1 RETURNING *`,
-                    [id]
-                );
 
-                if (!res.rows[0]) {
-                    throw new Error("Track not found");
-                }
+            const res = await pool.query(
+                `DELETE FROM tracks WHERE id=$1 RETURNING *`,
+                [id]
+            );
 
-                return {
-                    message: "Track deleted successfully"
-                };
-            } catch (err) {
-                throw new Error("Failed to delete track");
-            }
+            requireRow(res, "Track not found");
+
+            return {
+                message: "Track deleted successfully"
+            };
         },
     },
 
     Track: {
-        album: async (track, _, { loaders }) => {
-            return loaders.albumLoader.load(track.album_id);
-        },
+        album: (track, _, { loaders }) =>
+            loaders.albumLoader.load(track.album_id),
 
-        artists: async (track, _, { loaders }) => {
-            return loaders.trackArtistsLoader.load(track.id);
-        }
-
+        artists: (track, _, { loaders }) =>
+            loaders.trackArtistsLoader.load(track.id)
     }
 };
