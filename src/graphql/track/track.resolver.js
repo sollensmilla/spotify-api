@@ -1,149 +1,24 @@
-import { pool } from "../../config/connectDB.js";
-import { requireRow } from "../../utils/requireRow.js";
-
 export const trackResolver = {
 
     Query: {
 
-        tracks: async (_, args) => {
-            const {
-                name,
-                genre,
-                minPopularity,
-                minDanceability,
-                minEnergy,
-                minAcousticness,
-                limit = 20,
-                offset = 0
-            } = args;
+        tracks: (_, args, { services }) =>
+            services.trackService.getTracks(args),
 
-            let baseQuery = "SELECT * FROM tracks WHERE 1=1";
-            const values = [];
-
-            if (name) {
-                values.push(`%${name}%`);
-                baseQuery += ` AND track_name ILIKE $${values.length}`;
-            }
-
-            if (genre) {
-                values.push(genre);
-                baseQuery += ` AND track_genre = $${values.length}`;
-            }
-
-            if (minPopularity) {
-                values.push(minPopularity);
-                baseQuery += ` AND popularity >= $${values.length}`;
-            }
-
-            if (minDanceability) {
-                values.push(minDanceability);
-                baseQuery += ` AND danceability >= $${values.length}`;
-            }
-
-            if (minEnergy) {
-                values.push(minEnergy);
-                baseQuery += ` AND energy >= $${values.length}`;
-            }
-
-            if (minAcousticness) {
-                values.push(minAcousticness);
-                baseQuery += ` AND acousticness >= $${values.length}`;
-            }
-
-            const totalRes = await pool.query(
-                `SELECT COUNT(*) FROM (${baseQuery}) AS filtered`,
-                values
-            );
-
-            const total = parseInt(totalRes.rows[0].count, 10);
-
-            values.push(limit);
-            values.push(offset);
-
-            const paginatedQuery =
-                `${baseQuery} LIMIT $${values.length - 1} OFFSET $${values.length}`;
-
-            const res = await pool.query(paginatedQuery, values);
-
-            return {
-                total,
-                limit,
-                offset,
-                items: res.rows
-            };
-        },
-
-        track: async (_, { id }) => {
-            const res = await pool.query(
-                `SELECT * FROM tracks WHERE id=$1`,
-                [id]
-            );
-
-            return requireRow(res, "Track not found");
-        },
+        track: (_, { id }, { services }) =>
+            services.trackService.getTrack(id)
     },
 
     Mutation: {
 
-        addTrack: async (_, args) => {
+        addTrack: (_, args, { services }) =>
+            services.trackService.addTrack(args),
 
-            if (!args.track_name) {
-                throw new Error("track_name is required");
-            }
+        updateTrack: (_, args, { services }) =>
+            services.trackService.updateTrack(args),
 
-            if (!args.album_id) {
-                throw new Error("album_id is required");
-            }
-
-            const res = await pool.query(
-                `INSERT INTO tracks (track_name, album_id, track_genre, popularity)
-         VALUES ($1,$2,$3,$4)
-         RETURNING *`,
-                [
-                    args.track_name,
-                    args.album_id,
-                    args.genre,
-                    args.popularity
-                ]
-            );
-
-            return res.rows[0];
-        },
-
-        updateTrack: async (_, { id, ...fields }) => {
-
-            const keys = Object.keys(fields);
-
-            const set = keys
-                .map((k, i) => `${k}=$${i + 2}`)
-                .join(", ");
-
-            const values = [id, ...Object.values(fields)];
-
-            const res = await pool.query(
-                `UPDATE tracks
-         SET ${set}
-         WHERE id=$1
-         RETURNING *`,
-                values
-            );
-
-            return requireRow(res, "Track not found");
-        },
-
-        deleteTrack: async (_, { id }) => {
-
-            const res = await pool.query(
-                `DELETE FROM tracks WHERE id=$1 RETURNING *`,
-                [id]
-            );
-
-            requireRow(res, "Track not found");
-
-            return {
-                message: "Track deleted successfully"
-            };
-        },
+        deleteTrack: (_, { id }, { services }) =>
+            services.trackService.deleteTrack(id)
     },
 
     Track: {
@@ -153,4 +28,4 @@ export const trackResolver = {
         artists: (track, _, { loaders }) =>
             loaders.trackArtistsLoader.load(track.id)
     }
-};
+}

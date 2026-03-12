@@ -1,37 +1,54 @@
-import { ApolloServer } from "apollo-server-express";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
 
-import { typeDefs } from "../graphql/schema.js";
 import { resolvers } from "../graphql/resolver.js";
-import { trackArtistsLoader } from "../graphql/track/track.loader.js";
-import { albumLoader } from "../graphql/album/album.loader.js";
-import { artistLoader } from "../graphql/artist/artist.loader.js";
+import { typeDefs } from "../graphql/schema.js";
+
+import { pool } from "./connectDB.js";
+
+import { TrackService } from "../services/trackService.js";
+import { AlbumService } from "../services/albumService.js";
+import { ArtistService } from "../services/artistService.js";
+
+import { createTrackArtistsLoader } from "../graphql/track/track.loader.js";
+import { createAlbumLoader } from "../graphql/album/album.loader.js";
+import { createArtistLoader } from "../graphql/artist/artist.loader.js";
 
 export const connectGraphQL = async (app) => {
 
     const server = new ApolloServer({
         typeDefs,
-        resolvers,
-        context: () => ({
-            loaders: {
-                trackArtistsLoader,
-                albumLoader,
-                artistLoader
-            }
-        }),
-        formatError: (err) => {
-            return {
-                error: err.message
-            };
-        }
-
+        resolvers
     });
 
     await server.start();
 
-    server.applyMiddleware({
-        app,
-        path: "/graphql"
-    });
+    app.use(
+        "/graphql",
+        expressMiddleware(server, {
+
+            context: async () => {
+
+                const services = {
+                    trackService: new TrackService(pool),
+                    albumService: new AlbumService(pool),
+                    artistService: new ArtistService(pool)
+                };
+
+                const loaders = {
+                    albumLoader: createAlbumLoader(pool),
+                    artistLoader: createArtistLoader(pool),
+                    trackArtistsLoader: createTrackArtistsLoader(pool)
+                };
+
+                return {
+                    services,
+                    loaders
+                };
+            }
+
+        })
+    );
 
     return server;
 };

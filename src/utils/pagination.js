@@ -1,6 +1,10 @@
-import { pool } from "../config/connectDB.js";
+const allowedTables = ["artists", "albums", "tracks"];
 
-export const paginate = async (table, limit, offset) => {
+export const paginate = async (pool, table, limit = 20, offset = 0) => {
+    if (!allowedTables.includes(table)) {
+        throw new Error("Invalid table");
+    }
+
     const totalRes = await pool.query(`SELECT COUNT(*) FROM ${table}`);
     const total = parseInt(totalRes.rows[0].count, 10);
 

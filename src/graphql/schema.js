@@ -1,4 +1,4 @@
-import { gql } from "apollo-server-express";
+import gql from "graphql-tag";
 import { trackType } from "./track/track.type.js";
 import { albumType } from "./album/album.type.js";
 import { artistType } from "./artist/artist.type.js";
