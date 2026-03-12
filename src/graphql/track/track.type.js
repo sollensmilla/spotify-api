@@ -25,14 +25,26 @@ export const trackType = gql`
     items: [Track!]!
   }
 
-extend type Query {
-  tracks(
+   input TrackFilterInput {
     name: String
     genre: String
     minPopularity: Int
+    maxPopularity: Int
     minDanceability: Float
+    maxDanceability: Float
     minEnergy: Float
+    maxEnergy: Float
     minAcousticness: Float
+    maxAcousticness: Float
+    minTempo: Float
+    maxTempo: Float
+    key: Int
+    explicit: Boolean
+  }
+
+extend type Query {
+  tracks(
+    filter: TrackFilterInput
     limit: Int
     offset: Int
   ): TrackPage!
