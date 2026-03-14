@@ -19,7 +19,7 @@ export const connectGraphQL = async (app) => {
     app.use(
         "/graphql",
         expressMiddleware(server, {
-            context: async () => createContext(pool)
+            context: async ({ req }) => createContext({ req, pool })
         })
     );
 

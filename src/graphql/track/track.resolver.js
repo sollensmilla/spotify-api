@@ -1,3 +1,5 @@
+import { requireAuth } from "../../middleware/requireAuth.js";
+
 export const trackResolver = {
 
     Query: {
@@ -11,14 +13,20 @@ export const trackResolver = {
 
     Mutation: {
 
-        addTrack: (_, args, { services }) =>
-            services.trackService.addTrack(args),
+        addTrack: (_, args, { services, user }) => {
+            requireAuth(user);
+            return services.trackService.addTrack(args);
+        },
 
-        updateTrack: (_, args, { services }) =>
-            services.trackService.updateTrack(args),
+        updateTrack: (_, args, { services, user }) => {
+            requireAuth(user);
+            return services.trackService.updateTrack(args);
+        },
 
-        deleteTrack: (_, { id }, { services }) =>
-            services.trackService.deleteTrack(id)
+        deleteTrack: (_, { id }, { services, user }) => {
+            requireAuth(user);
+            return services.trackService.deleteTrack(id);
+        }
     },
 
     Track: {

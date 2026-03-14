@@ -135,4 +135,44 @@ export class TrackService {
 
         return requireRow(res, "Track not found")
     }
+
+    async addTrack({ track_name, album_id, genre, popularity }) {
+
+        const res = await this.pool.query(
+            `INSERT INTO tracks (track_name, album_id, track_genre, popularity)
+         VALUES ($1,$2,$3,$4)
+         RETURNING *`,
+            [track_name, album_id, genre, popularity]
+        );
+
+        return res.rows[0];
+    }
+
+    async updateTrack({ id, track_name, popularity }) {
+
+        const res = await this.pool.query(
+            `UPDATE tracks
+         SET track_name = COALESCE($2, track_name),
+             popularity = COALESCE($3, popularity)
+         WHERE id = $1
+         RETURNING *`,
+            [id, track_name, popularity]
+        );
+
+        return requireRow(res, "Track not found");
+    }
+
+    async deleteTrack(id) {
+
+        const res = await this.pool.query(
+            `DELETE FROM tracks
+         WHERE id=$1
+         RETURNING id`,
+            [id]
+        );
+
+        requireRow(res, "Track not found");
+
+        return true;
+    }
 }
