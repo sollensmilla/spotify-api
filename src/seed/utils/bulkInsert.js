@@ -1,3 +1,7 @@
+/** 
+ * Utility function for performing bulk inserts into a PostgreSQL database using the pg library. The function handles batching the inserts to avoid overwhelming the database with too many values at once.
+*/
+
 export async function bulkInsert(pool, table, columns, rows) {
 
     if (!rows.length) return;

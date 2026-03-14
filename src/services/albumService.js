@@ -1,3 +1,7 @@
+/** 
+ * Service class for handling album-related database operations.
+*/
+
 import { requireRow } from "../utils/requireRow.js";
 import { paginate } from "../utils/pagination.js";
 

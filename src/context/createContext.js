@@ -1,3 +1,7 @@
+/** 
+ * Sets up the context for GraphQL resolvers. It initializes services for tracks, albums, artists, and users, as well as data loaders for efficient data fetching. It also authenticates the user making the request and includes their information in the context.
+*/
+
 import { TrackService } from "../services/trackService.js";
 import { AlbumService } from "../services/albumService.js";
 import { ArtistService } from "../services/artistService.js";

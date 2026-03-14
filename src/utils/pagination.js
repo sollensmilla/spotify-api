@@ -1,3 +1,7 @@
+/** 
+ * This module provides a generic pagination function for querying the PostgreSQL database.
+*/
+
 const allowedTables = ["artists", "albums", "tracks"];
 
 export const paginate = async (pool, table, limit = 20, offset = 0) => {

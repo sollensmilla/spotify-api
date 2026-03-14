@@ -1,3 +1,7 @@
+/** 
+ * Middleware function for authenticating incoming requests.
+*/
+
 import { verifyToken } from "../utils/jwt.js";
 
 export const authenticate = (req) => {

@@ -1,3 +1,7 @@
+/** 
+ * Utility functions for generating and verifying JSON Web Tokens (JWTs) for user authentication.
+*/
+
 import jwt from "jsonwebtoken";
 
 const SECRET = process.env.JWT_SECRET;

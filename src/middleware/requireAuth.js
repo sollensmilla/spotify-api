@@ -1,3 +1,7 @@
+/** 
+ * Middleware function for requiring authentication in GraphQL resolvers.
+*/
+
 export function requireAuth(user) {
 
     if (!user) {

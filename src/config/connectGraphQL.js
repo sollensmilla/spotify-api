@@ -1,3 +1,7 @@
+/** 
+ * Connects to graphQL using Apollo Server. It sets up the server with type definitions and resolvers, and integrates it with an Express app.
+*/
+
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 

@@ -1,3 +1,7 @@
+/** 
+ * This module defines the main pipeline for seeding the PostgreSQL database. It orchestrates the extraction, transformation, clearing, and loading into the database.
+*/
+
 import { extractCSV } from "./extractor.js";
 import { transformData } from "./transformer.js";
 import { clearTables, loadData } from "./loader.js";

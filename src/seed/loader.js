@@ -1,3 +1,7 @@
+/** 
+ * This module contains functions for loading seed data into the PostgreSQL database.
+*/
+
 import { pool } from "../config/connectDB.js";
 import { bulkInsert } from "./utils/bulkInsert.js";
 

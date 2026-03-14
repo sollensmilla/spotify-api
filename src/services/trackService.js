@@ -1,3 +1,7 @@
+/** 
+ * Service class for handling track-related database operations.
+*/
+
 import { requireRow } from "../utils/requireRow.js";
 
 export class TrackService {

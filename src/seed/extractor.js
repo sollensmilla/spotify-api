@@ -1,3 +1,7 @@
+/** 
+ * Utility function for extracting data from a CSV file.
+ */
+
 import fs from "fs";
 import csv from "csv-parser";
 

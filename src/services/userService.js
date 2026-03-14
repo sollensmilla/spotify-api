@@ -1,3 +1,7 @@
+/** 
+ * Service class for handling user-related database operations.
+*/
+
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt.js";
 

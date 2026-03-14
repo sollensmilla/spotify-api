@@ -1,3 +1,7 @@
+/** 
+ * This module contains the transformation logic for converting raw CSV data into structured formats suitable for insertion into the PostgreSQL database.
+*/
+
 import { v4 as uuidv4 } from "uuid";
 
 export function transformData(rows) {

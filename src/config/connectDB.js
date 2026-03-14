@@ -1,3 +1,7 @@
+/** 
+ * Connects to the PostgreSQL database using the pg library. It exports a pool instance for executing queries and a connectDB function to test the connection.
+*/
+
 import pkg from "pg";
 import dotenv from "dotenv";
 
