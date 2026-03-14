@@ -2,17 +2,29 @@
  * This module contains functions for loading seed data into the PostgreSQL database.
 */
 
-import { pool } from "../config/connectDB.js";
 import { bulkInsert } from "./utils/bulkInsert.js";
 
-export async function clearTables() {
+export async function createTables(pool) {
+
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )
+    `);
+
+}
+
+export async function clearTables(pool) {
     await pool.query("DELETE FROM track_artists");
     await pool.query("DELETE FROM tracks");
     await pool.query("DELETE FROM artists");
     await pool.query("DELETE FROM albums");
+    await pool.query("DELETE FROM users");
 }
 
-export async function loadData({ albums, artists, tracks }) {
+export async function loadData(pool, { albums, artists, tracks }) {
 
     console.log("Inserting albums...");
     await bulkInsert(
