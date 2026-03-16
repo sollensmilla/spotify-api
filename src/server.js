@@ -4,7 +4,9 @@ import dotenv from "dotenv";
 import { connectGraphQL } from "./config/connectGraphQL.js";
 import { connectDB } from "./config/connectDB.js";
 
-dotenv.config();
+if (!process.env.RAILWAY_ENVIRONMENT) {
+  dotenv.config()
+}
 
 const app = express();
 app.use(cors());

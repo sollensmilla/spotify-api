@@ -5,7 +5,8 @@
 import { pool } from "../config/connectDB.js";
 import { extractCSV } from "./extractor.js";
 import { transformData } from "./transformer.js";
-import { createTables, clearTables, loadData } from "./loader.js";
+import { createTables } from "./createTables.js";
+import { clearTables, loadData } from "./loader.js";
 
 export async function runPipeline(csvPath) {
 

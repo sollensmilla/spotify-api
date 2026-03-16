@@ -4,18 +4,6 @@
 
 import { bulkInsert } from "./utils/bulkInsert.js";
 
-export async function createTables(pool) {
-
-    await pool.query(`
-        CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL
-        )
-    `);
-
-}
-
 export async function clearTables(pool) {
     await pool.query("DELETE FROM track_artists");
     await pool.query("DELETE FROM tracks");
