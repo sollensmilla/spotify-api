@@ -36,7 +36,7 @@ export class UserService {
             return {
                 token: generateToken(user)
             };
-        } catch (error) {
+        } catch (err) {
             if (err.code === "23505") {
                 throw new Error("User already exists");
             }
