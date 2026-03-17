@@ -13,23 +13,43 @@ export class UserService {
 
     async register(email, password) {
 
-        const hashed = await bcrypt.hash(password, 10);
+        if (!email || email.trim() === "" || !password || password.trim() === "") {
+            throw new Error("Email and password are required");
+        }
 
-        const res = await this.pool.query(
-            `INSERT INTO users(email, password)
+        if (password.length < 6) {
+            throw new Error("Password must be at least 6 characters");
+        }
+
+        try {
+            const hashed = await bcrypt.hash(password, 10);
+
+            const res = await this.pool.query(
+                `INSERT INTO users(email, password)
        VALUES ($1,$2)
        RETURNING id,email`,
-            [email, hashed]
-        );
+                [email, hashed]
+            );
 
-        const user = res.rows[0];
+            const user = res.rows[0];
 
-        return {
-            token: generateToken(user)
-        };
+            return {
+                token: generateToken(user)
+            };
+        } catch (error) {
+            if (err.code === "23505") {
+                throw new Error("User already exists");
+            }
+
+            throw new Error("Registration failed");
+        }
     }
 
     async login(email, password) {
+
+        if (!email || !password) {
+            throw new Error("Email and password are required");
+        }
 
         const res = await this.pool.query(
             `SELECT * FROM users WHERE email=$1`,
