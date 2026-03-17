@@ -4,6 +4,7 @@
 
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
+import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin/landingPage/default";
 
 import { resolvers } from "../graphql/resolver.js";
 import { typeDefs } from "../graphql/schema.js";
@@ -15,7 +16,8 @@ export const connectGraphQL = async (app) => {
 
     const server = new ApolloServer({
         typeDefs,
-        resolvers
+        resolvers,
+        plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
     });
 
     await server.start();
