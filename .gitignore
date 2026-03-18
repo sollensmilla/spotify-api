@@ -140,3 +140,7 @@ vite.config.ts.timestamp-*
 .DS_Store
 /data/spotify_dataset.csv
 .DS_Store
+tests/production.postman_environment.json
+.DS_Store
+.DS_Store
+.DS_Store

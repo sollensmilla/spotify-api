@@ -1,0 +1,1293 @@
+{
+	"info": {
+		"_postman_id": "41486b3f-342b-43f1-8b39-341de4a3d2fb",
+		"name": "Spotify-api tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40250406"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "regsiterUser",
+					"item": [
+						{
+							"name": "Success",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const json = pm.response.json();",
+											"",
+											"pm.test(\"Register success\", () => {",
+											"    pm.response.to.have.status(200);",
+											"",
+											"    pm.expect(json.data.register.token).to.exist;",
+											"});",
+											"",
+											"pm.environment.set(\"token\", json.data.register.token);",
+											"pm.environment.set(\"emailForLogin\", pm.environment.get(\"email\"));",
+											"pm.environment.set(\"passwordForLogin\", pm.environment.get(\"password\"));",
+											"pm.environment.set(\"registeredEmail\", pm.environment.get(\"email\"));"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"mutation Register($email: String!, $password: String!) { register(email: $email, password: $password) { token } }\",\n  \"variables\": {\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}",
+									"host": [
+										"{{baseUrl}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Failure- Duplicate",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Should return error for duplicate email\", function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.errors).to.exist;",
+											"    pm.expect(jsonData.errors[0].message).to.include(\"already exists\");",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"mutation Register($email: String!, $password: String!) { register(email: $email, password: $password) { token } }\",\n  \"variables\": {\n    \"email\": \"{{registeredEmail}}\",\n    \"password\": \"{{password}}\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}",
+									"host": [
+										"{{baseUrl}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Failure- Missing fields",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Should fail on empty fields\", () => {",
+											"    const json = pm.response.json();",
+											"",
+											"    pm.expect(json.errors).to.exist;",
+											"    pm.expect(json.errors[0].message).to.include(\"required\");",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"mutation Register($email: String!, $password: String!) { register(email: $email, password: $password) { token } }\",\n  \"variables\": {\n    \"email\": \"\",\n    \"password\": \"\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}",
+									"host": [
+										"{{baseUrl}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "loginUser",
+					"item": [
+						{
+							"name": "Success",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"JWT token is returned\", function () {",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.data.login.token).to.be.a(\"string\");",
+											"    pm.environment.set(\"jwtToken\", jsonData.data.login.token); ",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"if (!pm.environment.get(\"registeredEmail\") || !pm.environment.get(\"password\")) {",
+											"    console.error(\"Run register-success first!\");",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"mutation Login($email: String!, $password: String!) { login(email: $email, password: $password) { token } }\",\n  \"variables\": {\n    \"email\": \"{{emailForLogin}}\",\n    \"password\": \"{{passwordForLogin}}\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}",
+									"host": [
+										"{{baseUrl}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Failure- Invalid",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"if (!pm.environment.get(\"registeredEmail\")) {",
+											"    console.error(\"Run register success first!\");",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Login should fail with wrong password\", () => {",
+											"    const json = pm.response.json();",
+											"    pm.expect(json.errors).to.exist;",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"mutation Login($email: String!, $password: String!) { login(email: $email, password: $password) { token } }\",\n  \"variables\": {\n    \"email\": \"{{registeredEmail}}\",\n    \"password\": \"wrongPassword123\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}",
+									"host": [
+										"{{baseUrl}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Artists",
+			"item": [
+				{
+					"name": "Get Artists- Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"const artists = json.data.artists.items;",
+									"",
+									"pm.test(\"Artists array exists\", () => {",
+									"    pm.expect(artists).to.be.an(\"array\");",
+									"});",
+									"",
+									"pm.test(\"At least one artist returned\", () => {",
+									"    pm.expect(artists.length).to.be.greaterThan(0);",
+									"});",
+									"",
+									"const randomIndex = Math.floor(Math.random() * artists.length);",
+									"const randomArtist = artists[randomIndex];",
+									"",
+									"pm.environment.set(\"artistId\", randomArtist.id);",
+									"",
+									"pm.test(\"Random artist has id\", () => {",
+									"    pm.expect(randomArtist.id).to.exist;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query { artists(limit: 5) { items { id artist_name } } }\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Artists- Invalid params",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should fail on invalid limit\", () => {",
+									"    const json = pm.response.json();",
+									"",
+									"    pm.expect(json.errors).to.exist;",
+									"    pm.expect(json.errors[0].message).to.include(\"LIMIT\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query { artists(limit: -10) { items { id } } }\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Artist by ID- Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"",
+									"pm.test(\"Artist fetched by ID\", () => {",
+									"    pm.expect(json.data.artist.id).to.eql(pm.environment.get(\"artistId\"));",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query ($id: ID!) { artist(id: $id) { id artist_name } }\",\n  \"variables\": {\n    \"id\": \"{{artistId}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Albums",
+			"item": [
+				{
+					"name": "Get Albums- Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"const albums = json.data.albums.items;",
+									"",
+									"pm.test(\"Status is 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Albums array exists\", () => {",
+									"    pm.expect(albums).to.be.an(\"array\");",
+									"});",
+									"",
+									"pm.test(\"At least one album returned\", () => {",
+									"    pm.expect(albums.length).to.be.greaterThan(0);",
+									"});",
+									"",
+									"const randomIndex = Math.floor(Math.random() * albums.length);",
+									"const randomAlbum = albums[randomIndex];",
+									"",
+									"pm.environment.set(\"albumId\", randomAlbum.id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query { albums(limit: 5) { items { id album_name } } }\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Albums- Invalid params",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should fail on invalid limit\", () => {",
+									"    const json = pm.response.json();",
+									"",
+									"    pm.expect(json.errors).to.exist;",
+									"    pm.expect(json.errors[0].message).to.include(\"LIMIT\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query { albums(limit: -1) { items { id } } }\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Album by ID- Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"",
+									"pm.test(\"Album fetched by ID\", () => {",
+									"    pm.expect(json.data.album.id).to.eql(pm.environment.get(\"albumId\"));",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query ($id: ID!) { album(id: $id) { id album_name } }\",\n  \"variables\": {\n    \"id\": \"{{albumId}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tracks",
+			"item": [
+				{
+					"name": "Add track- Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"",
+									"pm.test(\"Track created\", () => {",
+									"    pm.expect(json.data.addTrack.id).to.exist;",
+									"});",
+									"",
+									"pm.test(\"Album is attached\", () => {",
+									"    pm.expect(json.data.addTrack.album).to.not.be.null;",
+									"});",
+									"",
+									"pm.environment.set(\"trackId\", json.data.addTrack.id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"mutation AddTrack($name: String!, $popularity: Int!, $albumId: ID!) { addTrack(track_name: $name, popularity: $popularity, album_id: $albumId) { id track_name popularity album { id album_name } } }\",\n  \"variables\": {\n    \"name\": \"{{trackName}}\",\n    \"popularity\": {{popularity}},\n    \"albumId\": \"{{albumId}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add track- Failure without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should fail without auth\", () => {",
+									"    const json = pm.response.json();",
+									"    pm.expect(json.errors).to.exist;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"mutation AddTrack($name: String!, $popularity: Int!) { addTrack(track_name: $name, popularity: $popularity) { id track_name popularity } }\",\n  \"variables\": {\n    \"name\": \"{{trackName}}\",\n    \"popularity\": {{popularity}}\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tracks- Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Tracks fetched\", () => {",
+									"    const json = pm.response.json();",
+									"    pm.expect(json.data.tracks.items).to.be.an(\"array\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query { tracks(limit: 5) { items { id track_name } } }\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get track by ID- Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Track fetched by ID\", () => {",
+									"    const json = pm.response.json();",
+									"    pm.expect(json.data.track.id).to.eql(pm.environment.get(\"trackId\"));",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query ($id: ID!) { track(id: $id) { id track_name } }\",\n  \"variables\": {\n    \"id\": \"{{trackId}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Track- Invalid ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Invalid UUID returns error\", () => {",
+									"    const json = pm.response.json();",
+									"    pm.expect(json.errors).to.exist;",
+									"    pm.expect(json.errors[0].message).to.include(\"uuid\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query { track(id: \\\"999999\\\") { id } }\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Track Artists- Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"",
+									"pm.test(\"Track with artists fetched\", () => {",
+									"    pm.expect(json.data.track).to.exist;",
+									"    pm.expect(json.data.track.id).to.eql(pm.environment.get(\"trackId\"));",
+									"});",
+									"",
+									"pm.test(\"Artists field exists\", () => {",
+									"    pm.expect(json.data.track.artists).to.be.an(\"array\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query ($id: ID!) { track(id: $id) { id track_name artists { id artist_name } } }\",\n  \"variables\": {\n    \"id\": \"{{trackId}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Track Album and Artists- Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"",
+									"pm.test(\"Track fetched\", () => {",
+									"    pm.expect(json.data.track).to.exist;",
+									"});",
+									"",
+									"pm.test(\"Album exists\", () => {",
+									"    pm.expect(json.data.track.album).to.not.be.null;",
+									"});",
+									"",
+									"pm.test(\"Artists is array\", () => {",
+									"    pm.expect(json.data.track.artists).to.be.an(\"array\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query ($id: ID!) { track(id: $id) { id track_name album { id album_name } artists { id artist_name } } }\",\n  \"variables\": {\n    \"id\": \"{{trackId}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Track Artists- Invalid Track",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"",
+									"pm.test(\"Should return null or error for non-existent track\", () => {",
+									"    pm.expect(json.data.track === null || json.errors).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query { track(id: \\\"00000000-0000-0000-0000-000000000000\\\") { id track_name artists { id } } }\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Track Album and Artists- Invalid Track",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"",
+									"pm.test(\"Track should not exist\", () => {",
+									"    if (json.errors) {",
+									"        pm.expect(json.errors).to.exist;",
+									"    } else {",
+									"        pm.expect(json.data.track).to.be.null;",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query ($id: ID!) { track(id: $id) { id track_name album { id album_name } artists { id artist_name } } }\",\n  \"variables\": {\n    \"id\": \"00000000-0000-0000-0000-000000000000\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Track- Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Track updated\", () => {",
+									"    const json = pm.response.json();",
+									"",
+									"    const expected = pm.environment.get(\"updatedTrackName\");",
+									"",
+									"    pm.expect(expected).to.not.include(\"{{\"); ",
+									"    pm.expect(json.data.updateTrack.track_name).to.eql(expected);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const random = Math.floor(Math.random() * 100000);",
+									"pm.environment.set(\"updatedTrackName\", \"Updated_\" + random);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"mutation Update($id: ID!, $name: String!) { updateTrack(id: $id, track_name: $name) { id track_name } }\",\n  \"variables\": {\n    \"id\": \"{{trackId}}\",\n    \"name\": \"{{updatedTrackName}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Track- Failure without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should fail without auth\", () => {",
+									"    const json = pm.response.json();",
+									"    pm.expect(json.errors).to.exist;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"mutation Update($id: ID!, $name: String!) { updateTrack(id: $id, track_name: $name) { id track_name } }\",\n  \"variables\": {\n    \"id\": \"{{trackId}}\",\n    \"name\": \"{{updatedTrackName}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Track- Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Track deleted\", () => {",
+									"    const json = pm.response.json();",
+									"    pm.expect(json.data.deleteTrack).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"mutation ($id: ID!) { deleteTrack(id: $id) }\",\n  \"variables\": {\n    \"id\": \"{{trackId}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Track- Failure without Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Should fail without auth\", () => {",
+									"    const json = pm.response.json();",
+									"    pm.expect(json.errors).to.exist;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"mutation ($id: ID!) { deleteTrack(id: $id) }\",\n  \"variables\": {\n    \"id\": \"{{trackId}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Track- Invalid ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Invalid UUID returns error\", () => {",
+									"    const json = pm.response.json();",
+									"    pm.expect(json.errors).to.exist;",
+									"    pm.expect(json.errors[0].message).to.include(\"uuid\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"mutation ($id: ID!) { deleteTrack(id: $id) }\",\n  \"variables\": {\n    \"id\": \"{ track(id: \\\"999999\\\") { id } }\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							"if (!pm.environment.get(\"trackName\")) {",
+							"    const random = Math.floor(Math.random() * 100000);",
+							"    pm.environment.set(\"trackName\", \"Track_\" + random);",
+							"}",
+							"",
+							"if (!pm.environment.get(\"popularity\")) {",
+							"    pm.environment.set(\"popularity\", Math.floor(Math.random() * 100));",
+							"}"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"const random = Math.floor(Math.random() * 100000);",
+					"",
+					"pm.environment.set(\"email\", `test${random}@mail.com`);",
+					"pm.environment.set(\"password\", \"Test123!\");",
+					"pm.environment.set(\"trackName\", `Track ${random}`);"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
