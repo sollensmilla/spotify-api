@@ -6,11 +6,11 @@ import { requireRow } from '../utils/requireRow.js'
 import { UserInputError } from 'apollo-server-errors'
 
 export class TrackService {
-  constructor(pool) {
+  constructor (pool) {
     this.pool = pool
   }
 
-  async getTracks(args) {
+  async getTracks (args) {
     const {
       filter = {},
       limit = 20,
@@ -134,13 +134,9 @@ export class TrackService {
     }
   }
 
-  async getTrack(id) {
+  async getTrack (id) {
     if (!id) {
       throw new UserInputError('Track id is required')
-    }
-
-    if (!isUUID(id)) {
-      throw new UserInputError('Invalid track id format')
     }
 
     const res = await this.pool.query(
@@ -151,7 +147,7 @@ export class TrackService {
     return requireRow(res, 'Track not found')
   }
 
-  async addTrack({ track_name, album_id, track_genre, popularity }) {
+  async addTrack ({ track_name, album_id, track_genre, popularity }) {
     if (!track_name) {
       throw new UserInputError('track_name is required')
     }
@@ -166,7 +162,7 @@ export class TrackService {
     return res.rows[0]
   }
 
-  async updateTrack({ id, track_name, popularity }) {
+  async updateTrack ({ id, track_name, popularity }) {
     if (!id) {
       throw new UserInputError('id is required')
     }
@@ -183,7 +179,7 @@ export class TrackService {
     return requireRow(res, 'Track not found')
   }
 
-  async deleteTrack(id) {
+  async deleteTrack (id) {
     if (!id) {
       throw new UserInputError('id is required')
     }
