@@ -147,22 +147,22 @@ export class TrackService {
     return requireRow(res, 'Track not found')
   }
 
-  async addTrack ({ trackName, albumId, genre, popularity }) {
-    if (!trackName) {
-      throw new UserInputError('trackName is required')
+  async addTrack ({ track_name, album_id, track_genre, popularity }) {
+    if (!track_name) {
+      throw new UserInputError('track_name is required')
     }
 
     const res = await this.pool.query(
       `INSERT INTO tracks (track_name, album_id, track_genre, popularity)
          VALUES ($1,$2,$3,$4)
          RETURNING *`,
-      [trackName, albumId, genre, popularity]
+      [track_name, album_id, track_genre, popularity]
     )
 
     return res.rows[0]
   }
 
-  async updateTrack ({ id, trackName, popularity }) {
+  async updateTrack ({ id, track_name, popularity }) {
     if (!id) {
       throw new UserInputError('id is required')
     }
@@ -173,7 +173,7 @@ export class TrackService {
              popularity = COALESCE($3, popularity)
          WHERE id = $1
          RETURNING *`,
-      [id, trackName, popularity]
+      [id, track_name, popularity]
     )
 
     return requireRow(res, 'Track not found')
