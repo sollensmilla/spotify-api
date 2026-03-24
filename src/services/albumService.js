@@ -3,6 +3,7 @@
  */
 
 import { requireRow } from '../utils/requireRow.js'
+import { UserInputError } from 'apollo-server-errors'
 import { paginate } from '../utils/pagination.js'
 
 export class AlbumService {
@@ -15,6 +16,10 @@ export class AlbumService {
   }
 
   async getAlbum (id) {
+    if (!id) {
+      throw new UserInputError('Album id is required')
+    }
+
     const res = await this.pool.query(
       'SELECT * FROM albums WHERE id=$1',
       [id]
@@ -24,6 +29,10 @@ export class AlbumService {
   }
 
   async getTracksByAlbum (albumId) {
+    if (!albumId) {
+      throw new UserInputError('Album id is required')
+    }
+
     const res = await this.pool.query(
       'SELECT * FROM tracks WHERE album_id=$1',
       [albumId]
@@ -33,13 +42,17 @@ export class AlbumService {
   }
 
   async getArtistsByAlbum (albumId) {
+    if (!albumId) {
+      throw new UserInputError('Album id is required')
+    }
+
     const res = await this.pool.query(
-            `SELECT DISTINCT a.*
+      `SELECT DISTINCT a.*
        FROM tracks t
        JOIN track_artists ta ON t.id = ta.track_id
        JOIN artists a ON ta.artist_id = a.id
        WHERE t.album_id=$1`,
-            [albumId]
+      [albumId]
     )
 
     return res.rows

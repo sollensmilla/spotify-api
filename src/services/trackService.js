@@ -3,6 +3,7 @@
  */
 
 import { requireRow } from '../utils/requireRow.js'
+import { UserInputError } from 'apollo-server-errors'
 
 export class TrackService {
   constructor (pool) {
@@ -15,6 +16,10 @@ export class TrackService {
       limit = 20,
       offset = 0
     } = args
+
+    if (limit < 0 || offset < 0) {
+      throw new UserInputError('limit and offset must be positive')
+    }
 
     const {
       name,
@@ -107,8 +112,8 @@ export class TrackService {
     }
 
     const totalRes = await this.pool.query(
-            `SELECT COUNT(*) FROM (${baseQuery}) AS filtered`,
-            values
+      `SELECT COUNT(*) FROM (${baseQuery}) AS filtered`,
+      values
     )
 
     const total = parseInt(totalRes.rows[0].count, 10)
@@ -117,7 +122,7 @@ export class TrackService {
     values.push(offset)
 
     const paginatedQuery =
-            `${baseQuery} LIMIT $${values.length - 1} OFFSET $${values.length}`
+      `${baseQuery} LIMIT $${values.length - 1} OFFSET $${values.length}`
 
     const res = await this.pool.query(paginatedQuery, values)
 
@@ -130,6 +135,10 @@ export class TrackService {
   }
 
   async getTrack (id) {
+    if (!id) {
+      throw new UserInputError('Track id is required')
+    }
+
     const res = await this.pool.query(
       'SELECT * FROM tracks WHERE id=$1',
       [id]
@@ -139,35 +148,47 @@ export class TrackService {
   }
 
   async addTrack ({ trackName, albumId, genre, popularity }) {
+    if (!trackName) {
+      throw new UserInputError('trackName is required')
+    }
+
     const res = await this.pool.query(
-            `INSERT INTO tracks (track_name, album_id, track_genre, popularity)
+      `INSERT INTO tracks (track_name, album_id, track_genre, popularity)
          VALUES ($1,$2,$3,$4)
          RETURNING *`,
-            [trackName, albumId, genre, popularity]
+      [trackName, albumId, genre, popularity]
     )
 
     return res.rows[0]
   }
 
   async updateTrack ({ id, trackName, popularity }) {
+    if (!id) {
+      throw new UserInputError('id is required')
+    }
+
     const res = await this.pool.query(
-            `UPDATE tracks
+      `UPDATE tracks
          SET track_name = COALESCE($2, track_name),
              popularity = COALESCE($3, popularity)
          WHERE id = $1
          RETURNING *`,
-            [id, trackName, popularity]
+      [id, trackName, popularity]
     )
 
     return requireRow(res, 'Track not found')
   }
 
   async deleteTrack (id) {
+    if (!id) {
+      throw new UserInputError('id is required')
+    }
+
     const res = await this.pool.query(
-            `DELETE FROM tracks
+      `DELETE FROM tracks
          WHERE id=$1
          RETURNING id`,
-            [id]
+      [id]
     )
 
     requireRow(res, 'Track not found')
