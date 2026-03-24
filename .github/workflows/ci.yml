@@ -1,0 +1,66 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Start Docker
+        run: docker compose up -d --build
+
+      - name: Wait for DB
+        run: |
+          for i in {1..15}; do
+            CONTAINER_ID=$(docker ps -q --filter "ancestor=postgres:15")
+            if [ -n "$CONTAINER_ID" ]; then
+              docker exec $CONTAINER_ID pg_isready && break
+            fi
+            echo "Waiting for DB..."
+            sleep 2
+          done
+
+      - name: Seed DB
+        run: |
+          APP_CONTAINER=$(docker ps -q --filter "name=app")
+          docker exec $APP_CONTAINER npm run seed
+
+      - name: ⏳ Wait for API
+        run: |
+          for i in {1..15}; do
+            curl -f http://localhost:4000/graphql && break
+            echo "Waiting for API..."
+            sleep 2
+          done
+
+      - name: Run API tests (Newman)
+        run: |
+          npm install -g newman
+          newman run tests/spotify-api.postman_collection.json \
+            -e tests/local.postman_environment.json
+
+      - name: Cleanup
+        if: always()
+        run: docker compose down
