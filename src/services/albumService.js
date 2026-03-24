@@ -7,13 +7,13 @@ import { UserInputError } from 'apollo-server-errors'
 import { paginate } from '../utils/pagination.js'
 
 export class AlbumService {
-  constructor(pool) {
+  constructor (pool) {
     this.pool = pool
   }
 
-  async getAlbums(limit, offset) {
+  async getAlbums (limit, offset) {
     if (limit < 0) {
-      throw new UserInputError('Limit must be >= 0')
+      throw new UserInputError('LIMIT must be >= 0')
     }
 
     if (offset < 0) {
@@ -23,7 +23,7 @@ export class AlbumService {
     return paginate(this.pool, 'albums', limit, offset)
   }
 
-  async getAlbum(id) {
+  async getAlbum (id) {
     if (!id) {
       throw new UserInputError('Album id is required')
     }
@@ -36,7 +36,7 @@ export class AlbumService {
     return requireRow(res, 'Album not found')
   }
 
-  async getTracksByAlbum(albumId) {
+  async getTracksByAlbum (albumId) {
     if (!albumId) {
       throw new UserInputError('Album id is required')
     }
@@ -49,7 +49,7 @@ export class AlbumService {
     return res.rows
   }
 
-  async getArtistsByAlbum(albumId) {
+  async getArtistsByAlbum (albumId) {
     if (!albumId) {
       throw new UserInputError('Album id is required')
     }

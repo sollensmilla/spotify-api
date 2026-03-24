@@ -2,10 +2,10 @@
  * Middleware function for requiring authentication in GraphQL resolvers.
  */
 
+import { AuthenticationError } from 'apollo-server-errors'
+
 export function requireAuth (user) {
   if (!user) {
-    const error = new Error('Unauthorized')
-    error.status = 401
-    throw error
+    throw new AuthenticationError('Unauthorized')
   }
 }
