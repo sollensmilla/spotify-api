@@ -10,6 +10,7 @@
     "dev": "nodemon src/server.js",
     "seed": "node src/seed.js",
     "test:api": "newman run tests/spotify-api.postman_collection.json -e tests/local.postman_environment.json",
+    "test:api-production": "newman run tests/spotify-api.postman_collection.json -e tests/production.postman_environment.json",
     "lint": "eslint ./src",
     "lint:fix": "eslint ./src --fix"
   },
