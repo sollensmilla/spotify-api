@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import gql from 'graphql-tag'
 
 export const trackType = gql`
   type Track {
@@ -67,4 +67,4 @@ extend type Mutation {
 
   deleteTrack(id: ID!): Boolean!
 }
-`;
+`

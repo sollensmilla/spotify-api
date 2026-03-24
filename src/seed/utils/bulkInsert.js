@@ -1,36 +1,34 @@
-/** 
+/**
  * Utility function for performing bulk inserts into a PostgreSQL database using the pg library. The function handles batching the inserts to avoid overwhelming the database with too many values at once.
-*/
+ */
 
-export async function bulkInsert(pool, table, columns, rows) {
+export async function bulkInsert (pool, table, columns, rows) {
+  if (!rows.length) return
 
-    if (!rows.length) return;
+  const BATCH_SIZE = 1000
 
-    const BATCH_SIZE = 1000;
+  for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+    const batch = rows.slice(i, i + BATCH_SIZE)
 
-    for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+    const values = []
+    const placeholders = []
 
-        const batch = rows.slice(i, i + BATCH_SIZE);
+    batch.forEach((row, rowIndex) => {
+      const rowPlaceholders = []
 
-        const values = [];
-        const placeholders = [];
+      columns.forEach((col, colIndex) => {
+        values.push(row[col] ?? null)
+        rowPlaceholders.push(`$${rowIndex * columns.length + colIndex + 1}`)
+      })
 
-        batch.forEach((row, rowIndex) => {
-            const rowPlaceholders = [];
+      placeholders.push(`(${rowPlaceholders.join(',')})`)
+    })
 
-            columns.forEach((col, colIndex) => {
-                values.push(row[col] ?? null);
-                rowPlaceholders.push(`$${rowIndex * columns.length + colIndex + 1}`);
-            });
+    const query = `
+            INSERT INTO ${table} (${columns.join(',')})
+            VALUES ${placeholders.join(',')}
+        `
 
-            placeholders.push(`(${rowPlaceholders.join(",")})`);
-        });
-
-        const query = `
-            INSERT INTO ${table} (${columns.join(",")})
-            VALUES ${placeholders.join(",")}
-        `;
-
-        await pool.query(query, values);
-    }
+    await pool.query(query, values)
+  }
 }

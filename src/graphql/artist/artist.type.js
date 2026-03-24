@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import gql from 'graphql-tag'
 
 export const artistType = gql`
 
@@ -23,4 +23,4 @@ export const artistType = gql`
     artist(id: ID!): Artist
   }
 
-`;
+`

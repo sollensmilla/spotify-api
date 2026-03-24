@@ -1,33 +1,31 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import { connectGraphQL } from "./config/connectGraphQL.js";
-import { connectDB } from "./config/connectDB.js";
+import express from 'express'
+import cors from 'cors'
+import dotenv from 'dotenv'
+import { connectGraphQL } from './config/connectGraphQL.js'
+import { connectDB } from './config/connectDB.js'
 
 if (!process.env.RAILWAY_ENVIRONMENT) {
   dotenv.config()
 }
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const app = express()
+app.use(cors())
+app.use(express.json())
 
-async function startServer() {
+async function startServer () {
   try {
+    await connectDB()
 
-    await connectDB();
+    await connectGraphQL(app)
 
-    const server = await connectGraphQL(app);
-
-    const PORT = process.env.PORT || 4000;
+    const PORT = process.env.PORT || 4000
 
     app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}/graphql`);
-    });
-
+      console.log(`Server running on http://localhost:${PORT}/graphql`)
+    })
   } catch (err) {
-    console.error("Server startup error:", err);
+    console.error('Server startup error:', err)
   }
 }
 
-startServer();
+startServer()

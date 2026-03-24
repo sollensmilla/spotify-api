@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import gql from 'graphql-tag'
 
 export const authType = gql`
 
@@ -19,4 +19,4 @@ export const authType = gql`
     ): AuthPayload!
   }
 
-`;
+`

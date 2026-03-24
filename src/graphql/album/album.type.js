@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import gql from 'graphql-tag'
 
 export const albumType = gql`
 
@@ -22,4 +22,4 @@ export const albumType = gql`
     album(id: ID!): Album
   }
 
-`;
+`

@@ -1,13 +1,13 @@
 export const authResolver = {
 
-    Mutation: {
+  Mutation: {
 
-        register: (_, { email, password }, { services }) =>
-            services.userService.register(email, password),
+    register: (_, { email, password }, { services }) =>
+      services.userService.register(email, password),
 
-        login: (_, { email, password }, { services }) =>
-            services.userService.login(email, password)
+    login: (_, { email, password }, { services }) =>
+      services.userService.login(email, password)
 
-    }
+  }
 
-};
+}

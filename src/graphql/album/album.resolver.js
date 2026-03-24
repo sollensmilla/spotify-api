@@ -1,20 +1,20 @@
 export const albumResolver = {
 
-    Query: {
+  Query: {
 
-        albums: (_, { limit = 20, offset = 0 }, { services }) =>
-            services.albumService.getAlbums(limit, offset),
+    albums: (_, { limit = 20, offset = 0 }, { services }) =>
+      services.albumService.getAlbums(limit, offset),
 
-        album: (_, { id }, { services }) =>
-            services.albumService.getAlbum(id)
-    },
+    album: (_, { id }, { services }) =>
+      services.albumService.getAlbum(id)
+  },
 
-    Album: {
+  Album: {
 
-        tracks: (album, _, { services }) =>
-            services.albumService.getTracksByAlbum(album.id),
+    tracks: (album, _, { services }) =>
+      services.albumService.getTracksByAlbum(album.id),
 
-        artists: (album, _, { services }) =>
-            services.albumService.getArtistsByAlbum(album.id)
-    }
-};
+    artists: (album, _, { services }) =>
+      services.albumService.getArtistsByAlbum(album.id)
+  }
+}

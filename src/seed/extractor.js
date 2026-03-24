@@ -1,18 +1,18 @@
-/** 
+/**
  * Utility function for extracting data from a CSV file.
  */
 
-import fs from "fs";
-import csv from "csv-parser";
+import fs from 'fs'
+import csv from 'csv-parser'
 
-export function extractCSV(path) {
-    return new Promise((resolve, reject) => {
-        const rows = [];
+export function extractCSV (path) {
+  return new Promise((resolve, reject) => {
+    const rows = []
 
-        fs.createReadStream(path)
-            .pipe(csv())
-            .on("data", (row) => rows.push(row))
-            .on("end", () => resolve(rows))
-            .on("error", reject);
-    });
+    fs.createReadStream(path)
+      .pipe(csv())
+      .on('data', (row) => rows.push(row))
+      .on('end', () => resolve(rows))
+      .on('error', reject)
+  })
 }
