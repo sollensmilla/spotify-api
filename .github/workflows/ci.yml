@@ -47,7 +47,7 @@ jobs:
           APP_CONTAINER=$(docker ps -q --filter "name=app")
           docker exec $APP_CONTAINER npm run seed
 
-      - name: ⏳ Wait for API
+      - name: Wait for API
         run: |
           for i in {1..15}; do
             curl -f http://localhost:4000/graphql && break
@@ -64,3 +64,19 @@ jobs:
       - name: Cleanup
         if: always()
         run: docker compose down
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Deploy to Railway
+        if: success()
+        run: |
+          npm install -g @railway/cli
+          railway up --service spotify-api
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
