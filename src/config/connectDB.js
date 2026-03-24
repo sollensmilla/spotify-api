@@ -13,12 +13,18 @@ export const pool = new Pool({
   connectionString: process.env.DATABASE_URL
 })
 
-export const connectDB = async () => {
-  try {
-    await pool.query('SELECT 1')
-    console.log('PostgreSQL connected ✅')
-  } catch (err) {
-    console.error('Connection failed ❌', err)
-    process.exit(1)
+export async function connectDB (retries = 5) {
+  while (retries) {
+    try {
+      await pool.query('SELECT 1')
+      console.log('Database connected ✅')
+      return
+    } catch (err) {
+      console.log('DB not ready, retrying...')
+      retries--
+      await new Promise(resolve => setTimeout(resolve, 3000))
+    }
   }
+
+  throw new Error('Could not connect to DB ❌')
 }

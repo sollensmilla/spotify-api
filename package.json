@@ -9,9 +9,9 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "seed": "node src/seed.js",
-    "test:api": "newman run tests/spotify-api.postman_collection.json -e tests/production.postman_environment.json",
-    "lint": "npx eslint ./src || exit 0",
-    "lint:fix": "npx eslint ./src --fix || exit 0"
+    "test:api": "newman run tests/spotify-api.postman_collection.json -e tests/local.postman_environment.json",
+    "lint": "eslint ./src",
+    "lint:fix": "eslint ./src --fix"
   },
   "keywords": [],
   "author": "",
