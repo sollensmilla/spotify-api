@@ -189,7 +189,32 @@ By using these patterns, the API ensures both **clarity for developers** and **r
 
 ## Core Technologies Used
 
-*List the technologies you chose and briefly explain why:*
+The API is built using a combination of modern Node.js-based technologies, focusing on scalability, maintainability, and clear separation of concerns.
+- **Node.js & Express** <br /> 
+The backend is built with Node.js using Express as the HTTP server. Express is used to handle middleware, routing, and integration with the GraphQL server.
+- **GraphQL (@apollo/server)** <br /> 
+Apollo Server is used to implement the GraphQL API. It provides a flexible query system, schema management, and built-in error handling. GraphQL enables clients to request only the data they need and supports nested queries efficiently.
+- **PostgreSQL (pg)** <br /> 
+A relational PostgreSQL database is used to store tracks, albums, artists, and users. The pg library is used for database communication with connection pooling.
+- **DataLoader** <br /> 
+DataLoader is used to batch and cache database queries, solving the N+1 problem in nested GraphQL queries and improving performance.
+- **JWT (jsonwebtoken)** <br /> 
+JSON Web Tokens are used for stateless authentication. Tokens are signed and verified to protect mutations and identify users.
+- **bcrypt** <br /> 
+Passwords are securely hashed using bcrypt with salt rounds before being stored in the database.
+- **dotenv** <br /> 
+Environment variables (such as database credentials and JWT secret) are managed using dotenv to keep sensitive data outside the codebase.
+- **CSV Parser (csv-parser)** <br /> 
+Used to parse the Spotify dataset from CSV files during the seeding process.
+- **UUID** <br /> 
+UUIDs are used for uniquely identifying resources where needed.
+- **CORS** <br /> 
+Enables cross-origin requests so that the API can be accessed from different clients.
+- **Apollo Server Errors** <br /> 
+Provides structured error handling with consistent error types such as UserInputError, AuthenticationError, and ApolloError.
+- **Development Tools (ESLint & Nodemon)**
+  - ESLint ensures consistent code quality and style.
+  - Nodemon improves development workflow by automatically restarting the server on file changes.
 
 
 ## Reflection
@@ -208,36 +233,29 @@ See [all requirements in Issues](../../issues/). Close issues as you implement t
 
 | Requirement | Issue | Status |
 |---|---|---|
-| Data acquisition — choose and document a dataset (1000+ data points) | [#1](../../issues/1) | :white_large_square: |
-| Full CRUD for primary resource, read-only for secondary resources | [#2](../../issues/2) | :white_large_square: |
-| JWT authentication for write operations | [#3](../../issues/3) | :white_large_square: |
-| Error handling (400, 401, 404 with consistent format) | [#4](../../issues/4) | :white_large_square: |
-| Filtering and pagination for large result sets | [#17](../../issues/17) | :white_large_square: |
-
-### Functional Requirements — REST
-
-| Requirement | Issue | Status |
-|---|---|---|
-| RESTful endpoints with proper HTTP methods and status codes | [#12](../../issues/12) | :white_large_square: |
-| HATEOAS (hypermedia links in responses) | [#13](../../issues/13) | :white_large_square: |
+| Data acquisition — choose and document a dataset (1000+ data points) | [#1](../../issues/1) | ✅ |
+| Full CRUD for primary resource, read-only for secondary resources | [#2](../../issues/2) | ✅ |
+| JWT authentication for write operations | [#3](../../issues/3) | ✅ |
+| Error handling (400, 401, 404 with consistent format) | [#4](../../issues/4) | ✅ |
+| Filtering and pagination for large result sets | [#17](../../issues/17) | ✅ |
 
 ### Functional Requirements — GraphQL
 
 | Requirement | Issue | Status |
 |---|---|---|
-| Queries and mutations via single `/graphql` endpoint | [#14](../../issues/14) | :white_large_square: |
-| At least one nested query | [#15](../../issues/15) | :white_large_square: |
-| GraphQL Playground available | [#16](../../issues/16) | :white_large_square: |
+| Queries and mutations via single `/graphql` endpoint | [#14](../../issues/14) | ✅ |
+| At least one nested query | [#15](../../issues/15) | ✅|
+| GraphQL Playground available | [#16](../../issues/16) | ✅ |
 
 ### Non-Functional Requirements
 
 | Requirement | Issue | Status |
 |---|---|---|
-| API documentation (Swagger/OpenAPI or Postman) | [#6](../../issues/6) | :white_large_square: |
-| Automated Postman tests (20+ test cases, success + failure) | [#7](../../issues/7) | :white_large_square: |
-| CI/CD pipeline running tests on every commit/MR | [#8](../../issues/8) | :white_large_square: |
-| Seed script for sample data | [#5](../../issues/5) | :white_large_square: |
-| Code quality (consistent standard, modular, documented) | [#10](../../issues/10) | :white_large_square: |
-| Deployed and publicly accessible | [#9](../../issues/9) | :white_large_square: |
-| Peer review reflection submitted on merge request | [#11](../../issues/11) | :white_large_square: |
+| API documentation (Swagger/OpenAPI or Postman) | [#6](../../issues/6) | ✅ |
+| Automated Postman tests (20+ test cases, success + failure) | [#7](../../issues/7) | ✅ |
+| CI/CD pipeline running tests on every commit/MR | [#8](../../issues/8) | ✅ |
+| Seed script for sample data | [#5](../../issues/5) | ✅ |
+| Code quality (consistent standard, modular, documented) | [#10](../../issues/10) | ✅ |
+| Deployed and publicly accessible | [#9](../../issues/9) | ✅ |
+| Peer review reflection submitted on merge request | [#11](../../issues/11) | ✅ |
 
