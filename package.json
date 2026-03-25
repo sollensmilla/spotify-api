@@ -30,6 +30,7 @@
     "fs": "^0.0.1-security",
     "graphql": "^16.13.1",
     "graphql-tag": "^2.12.6",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.19.0",
     "uuid": "^13.0.0"
