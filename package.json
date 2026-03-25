@@ -26,6 +26,7 @@
     "dataloader": "^2.2.3",
     "dotenv": "^17.3.1",
     "express": "^4.22.1",
+    "express-rate-limit": "^8.3.1",
     "fs": "^0.0.1-security",
     "graphql": "^16.13.1",
     "graphql-tag": "^2.12.6",

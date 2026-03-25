@@ -9,7 +9,7 @@ const SECRET = process.env.JWT_SECRET
 export const generateToken = (user) => {
   return jwt.sign(
     {
-      sub: user.id,
+      sub: user.id
     },
     SECRET,
     {

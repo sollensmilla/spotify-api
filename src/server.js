@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import { connectGraphQL } from './config/connectGraphQL.js'
 import { connectDB } from './config/connectDB.js'
+import { securityMiddleware } from './config/rateLimit.js'
 
 if (!process.env.RAILWAY_ENVIRONMENT) {
   dotenv.config()
@@ -11,6 +12,8 @@ if (!process.env.RAILWAY_ENVIRONMENT) {
 const app = express()
 app.use(cors())
 app.use(express.json())
+
+securityMiddleware(app)
 
 async function startServer () {
   try {

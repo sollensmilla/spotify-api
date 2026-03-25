@@ -13,11 +13,11 @@ import {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export class UserService {
-  constructor(pool) {
+  constructor (pool) {
     this.pool = pool
   }
 
-  async register(email, password) {
+  async register (email, password) {
     if (!email || !password) {
       throw new UserInputError('Email and password are required')
     }
@@ -54,7 +54,7 @@ export class UserService {
     }
   }
 
-  async login(email, password) {
+  async login (email, password) {
     if (!email || !password) {
       throw new UserInputError('Email and password are required')
     }
