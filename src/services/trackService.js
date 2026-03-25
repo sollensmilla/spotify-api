@@ -4,6 +4,7 @@
 
 import { requireRow } from '../utils/requireRow.js'
 import { UserInputError } from 'apollo-server-errors'
+import { assertString, assertNumber, assertBoolean, assertUUID } from '../utils/validation.js'
 
 export class TrackService {
   constructor (pool) {
@@ -51,52 +52,52 @@ export class TrackService {
       baseQuery += ` AND track_genre = $${values.length}`
     }
 
-    if (minPopularity) {
+    if (minPopularity !== undefined) {
       values.push(minPopularity)
       baseQuery += ` AND popularity >= $${values.length}`
     }
 
-    if (maxPopularity) {
+    if (maxPopularity !== undefined) {
       values.push(maxPopularity)
       baseQuery += ` AND popularity <= $${values.length}`
     }
 
-    if (minDanceability) {
+    if (minDanceability !== undefined) {
       values.push(minDanceability)
       baseQuery += ` AND danceability >= $${values.length}`
     }
 
-    if (maxDanceability) {
+    if (maxDanceability !== undefined) {
       values.push(maxDanceability)
       baseQuery += ` AND danceability <= $${values.length}`
     }
 
-    if (minEnergy) {
+    if (minEnergy !== undefined) {
       values.push(minEnergy)
       baseQuery += ` AND energy >= $${values.length}`
     }
 
-    if (maxEnergy) {
+    if (maxEnergy !== undefined) {
       values.push(maxEnergy)
       baseQuery += ` AND energy <= $${values.length}`
     }
 
-    if (minAcousticness) {
+    if (minAcousticness !== undefined) {
       values.push(minAcousticness)
       baseQuery += ` AND acousticness >= $${values.length}`
     }
 
-    if (maxAcousticness) {
+    if (maxAcousticness !== undefined) {
       values.push(maxAcousticness)
       baseQuery += ` AND acousticness <= $${values.length}`
     }
 
-    if (minTempo) {
+    if (minTempo !== undefined) {
       values.push(minTempo)
       baseQuery += ` AND tempo >= $${values.length}`
     }
 
-    if (maxTempo) {
+    if (maxTempo !== undefined) {
       values.push(maxTempo)
       baseQuery += ` AND tempo <= $${values.length}`
     }
@@ -106,8 +107,9 @@ export class TrackService {
       baseQuery += ` AND key = $${values.length}`
     }
 
-    if (explicit !== undefined) {
-      values.push(explicit)
+    if (explicit != null) {
+      const explicitVal = assertBoolean(explicit, 'explicit')
+      values.push(explicitVal)
       baseQuery += ` AND explicit = $${values.length}`
     }
 
@@ -135,9 +137,7 @@ export class TrackService {
   }
 
   async getTrack (id) {
-    if (!id) {
-      throw new UserInputError('Track id is required')
-    }
+    id = assertUUID(id, 'id')
 
     const res = await this.pool.query(
       'SELECT * FROM tracks WHERE id=$1',
@@ -148,8 +148,18 @@ export class TrackService {
   }
 
   async addTrack ({ track_name, album_id, track_genre, popularity }) {
-    if (!track_name) {
-      throw new UserInputError('track_name is required')
+    track_name = assertString(track_name, 'track_name', 1, 100)
+
+    if (album_id !== undefined) {
+      album_id = assertUUID(album_id, 'album_id')
+    }
+
+    if (track_genre !== undefined) {
+      track_genre = assertString(track_genre, 'track_genre', 1, 50)
+    }
+
+    if (popularity !== undefined) {
+      popularity = assertNumber(popularity, 'popularity', 0, 100)
     }
 
     const res = await this.pool.query(
@@ -167,6 +177,16 @@ export class TrackService {
       throw new UserInputError('id is required')
     }
 
+    id = assertUUID(id, 'id')
+
+    if (track_name !== undefined) {
+      track_name = assertString(track_name, 'track_name', 1, 100)
+    }
+
+    if (popularity !== undefined) {
+      popularity = assertNumber(popularity, 'popularity', 0, 100)
+    }
+
     const res = await this.pool.query(
       `UPDATE tracks
          SET track_name = COALESCE($2, track_name),
@@ -180,9 +200,7 @@ export class TrackService {
   }
 
   async deleteTrack (id) {
-    if (!id) {
-      throw new UserInputError('id is required')
-    }
+    id = assertUUID(id, 'id')
 
     const res = await this.pool.query(
       `DELETE FROM tracks
