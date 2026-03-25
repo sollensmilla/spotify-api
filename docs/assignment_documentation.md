@@ -42,7 +42,7 @@ This API serves data from the Spotify Tracks Dataset, exposing three main resour
 
 ### Authentication
 
-The API uses **JWT (JSON Web Token)** authentication. When a user registers or logs in, the server validates their credentials, hashes passwords with bcrypt (10 salt rounds), and returns a signed JWT containing the user's `id` and `email`, with a 24-hour expiry. The token is signed with a secret key stored in an environment variable (`JWT_SECRET`).
+The API uses **JWT (JSON Web Token)** authentication. When a user registers or logs in, the server validates their credentials, hashes passwords with bcrypt (12 salt rounds), and returns a signed JWT containing the user's `id` and `email`, with a 1-hour expiry. The token is signed with a secret key stored in an environment variable (`JWT_SECRET`).
 On protected requests, an `authenticate` middleware extracts the Bearer token from the `Authorization` header and verifies it. The decoded user is attached to the GraphQL context, and a `requireAuth` guard is called at the top of any resolver that requires authentication — throwing an `AuthenticationError` if no valid user is present. Invalid or expired tokens are handled gracefully by returning `null` rather than crashing, letting `requireAuth` handle the rejection uniformly.
 
 #### **Why JWT?**
