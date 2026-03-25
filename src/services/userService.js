@@ -13,11 +13,11 @@ import {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export class UserService {
-  constructor (pool) {
+  constructor(pool) {
     this.pool = pool
   }
 
-  async register (email, password) {
+  async register(email, password) {
     if (!email || !password) {
       throw new UserInputError('Email and password are required')
     }
@@ -43,7 +43,7 @@ export class UserService {
       const user = res.rows[0]
 
       return {
-        token: generateToken({ id: user.id })
+        token: generateToken({ sub: user.id })
       }
     } catch (err) {
       if (err.code === '23505') {
@@ -54,7 +54,7 @@ export class UserService {
     }
   }
 
-  async login (email, password) {
+  async login(email, password) {
     if (!email || !password) {
       throw new UserInputError('Email and password are required')
     }
@@ -77,7 +77,7 @@ export class UserService {
     }
 
     return {
-      token: generateToken({ id: user.id })
+      token: generateToken({ sub: user.id })
     }
   }
 }

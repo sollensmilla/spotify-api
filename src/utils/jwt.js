@@ -8,15 +8,22 @@ const SECRET = process.env.JWT_SECRET
 
 export const generateToken = (user) => {
   return jwt.sign(
-    { id: user.id, email: user.email },
+    {
+      sub: user.id,
+    },
     SECRET,
-    { expiresIn: '1d' }
+    {
+      expiresIn: '1h',
+      algorithm: 'HS256'
+    }
   )
 }
 
 export const verifyToken = (token) => {
   try {
-    return jwt.verify(token, SECRET)
+    return jwt.verify(token, SECRET, {
+      algorithms: ['HS256']
+    })
   } catch {
     return null
   }
