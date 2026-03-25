@@ -7,11 +7,14 @@ import { verifyToken } from '../utils/jwt.js'
 export const authenticate = (req) => {
   const authHeader = req.headers.authorization
 
-  if (!authHeader) return null
-
-  if (!authHeader.startsWith('Bearer ')) return null
+  if (!authHeader?.startsWith('Bearer ')) return null
 
   const token = authHeader.split(' ')[1]
+  const decoded = verifyToken(token)
 
-  return verifyToken(token)
+  if (!decoded) return null
+
+  return {
+    id: decoded.sub
+  }
 }
