@@ -9,10 +9,10 @@ The full assignment documentation (design decisions, architecture, etc.) can be 
 This is a **GraphQL API** built on top of a Spotify tracks dataset. It exposes three main resources:
 - Tracks (CRUD)
 - Albums (read-only)
-- Artists (read-only) <br />
-<br/>
+- Artists (read-only)
+
 The API allows filtering tracks based on audio features such as:
-- danceability
+-  danceability
 - energy
 - tempo
 - genre
@@ -134,3 +134,12 @@ The project follows:
 📄 [https://documenter.getpostman.com/view/40250406/2sBXijJrkf](https://documenter.getpostman.com/view/40250406/2sBXijJrkf)
 
 ## Features
+- GraphQL single endpoint `(/graphql)`
+- Filtering & pagination
+- Nested queries (tracks ↔ artists ↔ albums)
+- JWT authentication
+- DataLoader optimization (avoids N+1 problem)
+- Structured error handling
+
+## License
+This project is part of a university assignment and is intended for educational purposes.
