@@ -36,6 +36,12 @@ jobs:
 
       - run: npm ci
 
+            - name: Set environment variables for Docker
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
+          echo "PORT=${{ secrets.PORT }}" >> $GITHUB_ENV
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+
       - name: Start Docker
         run: docker compose up -d --build
 
