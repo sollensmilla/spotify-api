@@ -254,11 +254,21 @@ Protects the API from abuse by limiting the number of requests per IP.
 
 ## Reflection
 
-*What was hard? What did you learn? What would you do differently?*
+One of the main challenges in this project was maintaining clean and well-structured code throughout the development process. Since the project grew quite large, it required careful planning of the architecture and separation of concerns to keep everything maintainable and consistent.
+
+Another challenge, but also one of the most rewarding parts, was learning GraphQL. I had not worked with it before, but I found it very suitable for this type of API, especially when handling nested data and flexible queries.
+
+Working with PostgreSQL was also a positive experience. Having recently studied database technology, SQL felt familiar, and using a relational database made it easier to model the data properly. In particular, join tables were very useful for representing relationships in the dataset, such as between tracks and artists.
+
+Security was another important and challenging aspect. While I had previous experience with security concepts, I had not applied them to this extent in a larger project. Implementing validation, authentication, and protection mechanisms such as rate limiting and secure headers was both challenging and highly educational, and it is something I will definitely carry forward into future projects.
+
+If I were to do something differently, I would integrate a stronger security mindset from the beginning. Initially, I only implemented basic measures such as password hashing, and added more advanced protections later in the process. Because of this, there is a risk that some aspects may have been overlooked. In future projects, I will prioritize security earlier in the development lifecycle.
 
 ## Acknowledgements
 
-*Resources, attributions, or shoutouts.*
+I would like to thank our assignment instructor, Oxana, for her valuable guidance, resources, and continuous support throughout the assignment. Her feedback, as well as the tips and discussions shared on Slack, have been very helpful and inspiring.
+
+I would also like to thank my classmates in WP24 for their support and collaboration, especially through discussions on Discord where we could exchange ideas and help each other throughout the project.
 
 [⬆ Back to top](#table-of-contents)
 

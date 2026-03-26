@@ -117,14 +117,47 @@ tests/production.postman_environment.json
 [⬆ Back to top](#table-of-contents)
 
 ## Docker
-### Build Docker image
+The application can be run using Docker Compose, which starts both the API and the PostgreSQL database.
+
+### Prerequisites
+- Docker installed
+- Docker Compose (included in Docker Desktop)
+
+### Run the application
+Start the application and database:
 ```
-docker build -t spotify-api .
+docker compose up --build
 ```
-### Run container
+This will:
+- Build the API container
+- Start a PostgreSQL database
+- Start the API server
+
+### Access the API
+Once running, the API is available at:
 ```
-docker run -p 3000:3000 --env-file .env spotify-api
+http://localhost:4000/graphql
 ```
+
+### Environment variables
+The Docker setup uses a separate environment file:
+```
+.env.docker
+```
+Make sure it contains the correct database connection string:
+```
+DATABASE_URL=postgres://postgres:your_password@db:5432/spotify_db_dev
+JWT_SECRET=your_secret
+PORT=4000
+```
+Note: The database host is `db` (the service name in Docker Compose), not `localhost`.
+
+### Stop containers
+```
+docker compose down
+```
+
+[⬆ Back to top](#table-of-contents)
 
 ## Project Structure
 ```
@@ -143,8 +176,6 @@ The project follows:
 - Separation of concerns
 - Dependency injection
 - Modular GraphQL architecture
-
-[⬆ Back to top](#table-of-contents)
 
 ## API Access
 ### Production
@@ -205,6 +236,11 @@ This protects the API from abuse and brute-force attacks.
 - Ensures secrets are not exposed in the codebase
 
 ## License
-This project is part of a university assignment and is intended for educational purposes.
+## License
+This project is licensed under the MIT License.
+
+See the [LICENSE](./LICENSE) file for details.
+
+Note: This project was developed as part of a university assignment.
 
 [⬆ Back to top](#table-of-contents)
