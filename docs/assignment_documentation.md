@@ -2,6 +2,31 @@
 
 ## Spotify API
 
+## Table of Contents
+- [Objective](#objective)
+- [Implementation Type](#implementation-type)
+- [Links and Testing](#links-and-testing)
+- [Dataset](#dataset)
+- [Design Decisions](#design-decisions)
+  - [Authentication](#authentication)
+    - [Why JWT?](#why-jwt)
+    - [Alternatives and Trade-offs](#alternatives-and-trade-offs)
+  - [API Design](#api-design)
+    - [Schema design](#schema-design)
+    - [Nested Queries](#nested-queries)
+    - [Database Indexing and Performance](#database-indexing-and-performance)
+    - [Pagination with Page Types](#pagination-with-page-types)
+    - [Single Endpoint Approach](#single-endpoint-approach)
+  - [Error Handling](#error-handling)
+    - [Error Consistency](#error-consistency)
+- [Core Technologies Used](#core-technologies-used)
+- [Reflection](#reflection)
+- [Acknowledgements](#acknowledgements)
+- [Requirements](#requirements)
+  - [Functional Requirements — Common](#functional-requirements--common)
+  - [Functional Requirements — GraphQL](#functional-requirements--graphql)
+  - [Non-Functional Requirements](#non-functional-requirements)
+
 ## Objective
 
 This API serves data from the Spotify Tracks Dataset, exposing three main resources: tracks, albums, and artists. Users can query and filter tracks by audio features such as danceability, energy, tempo, and genre, as well as browse albums and artists. Tracks support full CRUD operations, while albums and artists are read-only. The API also includes user registration and login with JWT authentication to protect write operations.
@@ -37,6 +62,7 @@ This API serves data from the Spotify Tracks Dataset, exposing three main resour
 | **Secondary resource 1 (read-only)** | Albums (album_id, album_name, total_tracks) |
 | **Secondary resource 2 (read-only)** | Artists (artist_id, artist_name, genres, total_tracks, average_popularity) |
 
+[⬆ Back to top](#table-of-contents)
 
 ## Design Decisions
 
@@ -155,7 +181,9 @@ However, this approach also introduces challenges:
 - **Caching is less straightforward** compared to REST APIs
 - **Security concerns**, such as deeply nested or expensive queries, require additional safeguards
 
-### Error Handling
+[⬆ Back to top](#table-of-contents)
+
+## Error Handling
 
 The API uses **GraphQL errors** to provide consistent, structured feedback to clients. All service methods validate input and handle exceptional cases by throwing specific error types provided by `apollo-server-errors`. These include:
 - **UserInputError** – used when the client sends invalid input, such as missing required fields, invalid limits or offsets, or invalid filter values.
@@ -187,6 +215,8 @@ This consistent structure makes it easy for clients to handle errors and display
 
 By using these patterns, the API ensures both **clarity for developers** and **robust handling of edge cases**, reducing the risk of silent failures or inconsistent responses.
 
+[⬆ Back to top](#table-of-contents)
+
 ## Core Technologies Used
 
 The API is built using a combination of modern Node.js-based technologies, focusing on scalability, maintainability, and clear separation of concerns.
@@ -212,10 +242,15 @@ UUIDs are used for uniquely identifying resources where needed.
 Enables cross-origin requests so that the API can be accessed from different clients.
 - **Apollo Server Errors** <br /> 
 Provides structured error handling with consistent error types such as UserInputError, AuthenticationError, and ApolloError.
+- **Helmet**  <br />
+Used to secure HTTP headers and protect against common web vulnerabilities.
+- **Express Rate Limit**  <br/>
+Protects the API from abuse by limiting the number of requests per IP.
 - **Development Tools (ESLint & Nodemon)**
   - ESLint ensures consistent code quality and style.
   - Nodemon improves development workflow by automatically restarting the server on file changes.
 
+[⬆ Back to top](#table-of-contents)
 
 ## Reflection
 
@@ -224,6 +259,8 @@ Provides structured error handling with consistent error types such as UserInput
 ## Acknowledgements
 
 *Resources, attributions, or shoutouts.*
+
+[⬆ Back to top](#table-of-contents)
 
 ## Requirements
 
@@ -259,3 +296,4 @@ See [all requirements in Issues](../../issues/). Close issues as you implement t
 | Deployed and publicly accessible | [#9](../../issues/9) | ✅ |
 | Peer review reflection submitted on merge request | [#11](../../issues/11) | ✅ |
 
+[⬆ Back to top](#table-of-contents)
