@@ -36,7 +36,7 @@ jobs:
 
       - run: npm ci
 
-            - name: Set environment variables for Docker
+      - name: Set environment variables for Docker
         run: |
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
           echo "PORT=${{ secrets.PORT }}" >> $GITHUB_ENV
