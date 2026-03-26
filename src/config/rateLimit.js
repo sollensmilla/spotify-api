@@ -10,7 +10,7 @@ export const securityMiddleware = (app) => {
 
   app.use('/graphql', rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 200,
+    max: 100,
     skip: (req) => {
       const query = req.body?.query || ''
       return query.includes('register') || query.includes('login')
