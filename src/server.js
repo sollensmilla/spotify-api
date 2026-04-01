@@ -6,7 +6,6 @@ import { connectDB } from './config/connectDB.js'
 import { securityMiddleware } from './config/rateLimit.js'
 import { helmetMiddleware } from './config/helmet.js'
 
-
 if (!process.env.RAILWAY_ENVIRONMENT) {
   dotenv.config()
 }
