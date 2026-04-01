@@ -1,10 +1,11 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import helmet from 'helmet'
 import { connectGraphQL } from './config/connectGraphQL.js'
 import { connectDB } from './config/connectDB.js'
 import { securityMiddleware } from './config/rateLimit.js'
+import { helmetMiddleware } from './config/helmet.js'
+
 
 if (!process.env.RAILWAY_ENVIRONMENT) {
   dotenv.config()
@@ -12,7 +13,7 @@ if (!process.env.RAILWAY_ENVIRONMENT) {
 
 const app = express()
 app.use(cors())
-app.use(helmet())
+helmetMiddleware(app)
 app.use(express.json())
 
 securityMiddleware(app)
