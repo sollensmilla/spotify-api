@@ -213,4 +213,15 @@ export class TrackService {
 
     return true
   }
+
+  async getGenres () {
+    const res = await this.pool.query(`
+    SELECT DISTINCT track_genre 
+    FROM tracks
+    WHERE track_genre IS NOT NULL
+    ORDER BY track_genre ASC
+  `)
+
+    return res.rows.map(row => row.track_genre)
+  }
 }

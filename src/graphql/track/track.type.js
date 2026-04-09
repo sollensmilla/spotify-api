@@ -49,6 +49,7 @@ extend type Query {
     offset: Int
   ): TrackPage!
   track(id: ID!): Track
+  genres: [String!]!
 }
 
 extend type Mutation {

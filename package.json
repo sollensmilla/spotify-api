@@ -33,6 +33,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.19.0",
+    "rc-slider": "^11.1.9",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

@@ -8,7 +8,10 @@ export const trackResolver = {
       services.trackService.getTracks(args),
 
     track: (_, { id }, { services }) =>
-      services.trackService.getTrack(id)
+      services.trackService.getTrack(id),
+
+    genres: (_, __, { services }) =>
+      services.trackService.getGenres()
   },
 
   Mutation: {
