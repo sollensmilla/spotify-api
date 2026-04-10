@@ -4,7 +4,7 @@ export const trackType = gql`
   type Track {
     id: ID!
     track_name: String!
-    album: Album
+    albums: [Album!]
     artists: [Artist!]
     track_genre: String
     duration_ms: Int
@@ -16,6 +16,8 @@ export const trackType = gql`
     energy: Float
     acousticness: Float
     instrumentalness: Float
+    spotify_id: String   
+    image_url: String    
   }
 
   type TrackPage {
@@ -55,7 +57,7 @@ extend type Query {
 extend type Mutation {
   addTrack(
     track_name: String!
-    album_id: ID
+    album_ids: [ID!]
     genre: String
     popularity: Int
   ): Track!

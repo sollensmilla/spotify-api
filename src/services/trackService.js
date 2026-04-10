@@ -7,11 +7,11 @@ import { UserInputError } from 'apollo-server-errors'
 import { assertString, assertNumber, assertBoolean, assertUUID } from '../utils/validation.js'
 
 export class TrackService {
-  constructor (pool) {
+  constructor(pool) {
     this.pool = pool
   }
 
-  async getTracks (args) {
+  async getTracks(args) {
     const {
       filter = {},
       limit = 20,
@@ -136,7 +136,7 @@ export class TrackService {
     }
   }
 
-  async getTrack (id) {
+  async getTrack(id) {
     id = assertUUID(id, 'id')
 
     const res = await this.pool.query(
@@ -147,12 +147,8 @@ export class TrackService {
     return requireRow(res, 'Track not found')
   }
 
-  async addTrack ({ track_name, album_id, track_genre, popularity }) {
+  async addTrack({ track_name, album_ids, track_genre, popularity }) {
     track_name = assertString(track_name, 'track_name', 1, 100)
-
-    if (album_id !== undefined) {
-      album_id = assertUUID(album_id, 'album_id')
-    }
 
     if (track_genre !== undefined) {
       track_genre = assertString(track_genre, 'track_genre', 1, 50)
@@ -162,17 +158,33 @@ export class TrackService {
       popularity = assertNumber(popularity, 'popularity', 0, 100)
     }
 
+    if (album_ids !== undefined) {
+      album_ids = album_ids.map(id => assertUUID(id, 'album_id'))
+    }
+
     const res = await this.pool.query(
-      `INSERT INTO tracks (track_name, album_id, track_genre, popularity)
-         VALUES ($1,$2,$3,$4)
-         RETURNING *`,
-      [track_name, album_id, track_genre, popularity]
+      `INSERT INTO tracks (track_name, track_genre, popularity)
+     VALUES ($1,$2,$3)
+     RETURNING *`,
+      [track_name, track_genre, popularity]
     )
 
-    return res.rows[0]
+    const track = res.rows[0]
+
+    if (album_ids && album_ids.length > 0) {
+      for (const albumId of album_ids) {
+        await this.pool.query(
+          `INSERT INTO track_albums (track_id, album_id)
+         VALUES ($1, $2)`,
+          [track.id, albumId]
+        )
+      }
+    }
+
+    return track
   }
 
-  async updateTrack ({ id, track_name, popularity }) {
+  async updateTrack({ id, track_name, popularity }) {
     if (!id) {
       throw new UserInputError('id is required')
     }
@@ -199,7 +211,7 @@ export class TrackService {
     return requireRow(res, 'Track not found')
   }
 
-  async deleteTrack (id) {
+  async deleteTrack(id) {
     id = assertUUID(id, 'id')
 
     const res = await this.pool.query(
@@ -214,7 +226,7 @@ export class TrackService {
     return true
   }
 
-  async getGenres () {
+  async getGenres() {
     const res = await this.pool.query(`
     SELECT DISTINCT track_genre 
     FROM tracks
