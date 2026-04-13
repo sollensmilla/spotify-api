@@ -39,16 +39,6 @@ export const trackResolver = {
     artists: (track, _, { loaders }) =>
       loaders.trackArtistsLoader.load(track.id),
 
-    image_url: async (track) => {
-      if (!track.spotify_id) return null
-
-      try {
-        const token = await getSpotifyToken()
-        return await getSpotifyImage(track.spotify_id, token)
-      } catch (err) {
-        console.log('Spotify error:', track.spotify_id)
-        return null
-      }
-    }
+    image_url: (track) => track.image_url
   }
 }
