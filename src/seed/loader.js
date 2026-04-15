@@ -4,7 +4,7 @@
 
 import { bulkInsert } from './utils/bulkInsert.js'
 
-export async function clearTables(pool) {
+export async function clearTables (pool) {
   await pool.query('DELETE FROM track_artists')
   await pool.query('DELETE FROM track_albums')
   await pool.query('DELETE FROM tracks')
@@ -13,7 +13,7 @@ export async function clearTables(pool) {
   await pool.query('DELETE FROM users')
 }
 
-export async function loadData(pool, { albums, artists, tracks }) {
+export async function loadData (pool, { albums, artists, tracks }) {
   console.log('Inserting albums...')
   await bulkInsert(
     pool,

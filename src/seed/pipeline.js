@@ -8,9 +8,7 @@ import { transformData } from './transformer.js'
 import { createTables } from './createTables.js'
 import { clearTables, loadData } from './loader.js'
 
-const sleep = (ms) => new Promise(res => setTimeout(res, ms))
-
-export async function runPipeline(csvPath) {
+export async function runPipeline (csvPath) {
   console.log('Extracting CSV...')
   const rows = await extractCSV(csvPath)
 

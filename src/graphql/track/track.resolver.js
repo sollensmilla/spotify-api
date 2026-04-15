@@ -16,14 +16,17 @@ export const trackResolver = {
 
   Mutation: {
 
-    addTrack: (_, args, { services, user }) => {
+    addTrack: (_, { input }, { services, user }) => {
       requireAuth(user)
-      return services.trackService.addTrack(args)
+      return services.trackService.addTrack(input)
     },
 
-    updateTrack: (_, args, { services, user }) => {
+    updateTrack: (_, { id, input }, { services, user }) => {
       requireAuth(user)
-      return services.trackService.updateTrack(args)
+      return services.trackService.updateTrack({
+        id,
+        ...input
+      })
     },
 
     deleteTrack: (_, { id }, { services, user }) => {

@@ -2,7 +2,7 @@
  * Creates the PostgreSQL schema.
  */
 
-export async function createTables(pool) {
+export async function createTables (pool) {
   console.log('Creating database schema...')
 
   await pool.query(`

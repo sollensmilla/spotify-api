@@ -69,7 +69,7 @@ export function transformData (rows) {
 
     const albumKey = `${row.album_name}-${row.artists}`
 
- let albumId
+    let albumId
     if (!albumMap.has(albumKey)) {
       albumId = uuidv4()
       albumMap.set(albumKey, {
@@ -78,7 +78,7 @@ export function transformData (rows) {
         total_tracks: 1
       })
     } else {
-       const album = albumMap.get(albumKey)
+      const album = albumMap.get(albumKey)
       album.total_tracks++
       albumId = album.id
     }
