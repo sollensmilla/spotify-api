@@ -5,7 +5,7 @@
 export async function bulkInsert (pool, table, columns, rows) {
   if (!rows.length) return
 
-  const BATCH_SIZE = 1000
+  const BATCH_SIZE = 100
 
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const batch = rows.slice(i, i + BATCH_SIZE)
