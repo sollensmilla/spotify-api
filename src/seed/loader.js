@@ -6,6 +6,7 @@ import { bulkInsert } from './utils/bulkInsert.js'
 
 export async function clearTables (pool) {
   await pool.query('DELETE FROM track_artists')
+  await pool.query('DELETE FROM track_albums')
   await pool.query('DELETE FROM tracks')
   await pool.query('DELETE FROM artists')
   await pool.query('DELETE FROM albums')
@@ -36,7 +37,6 @@ export async function loadData (pool, { albums, artists, tracks }) {
     [
       'id',
       'track_name',
-      'album_id',
       'track_genre',
       'duration_ms',
       'popularity',
@@ -46,7 +46,9 @@ export async function loadData (pool, { albums, artists, tracks }) {
       'danceability',
       'energy',
       'acousticness',
-      'instrumentalness'
+      'instrumentalness',
+      'spotify_id',
+      'image_url'
     ],
     tracks
   )
@@ -69,5 +71,25 @@ export async function loadData (pool, { albums, artists, tracks }) {
     'track_artists',
     ['track_id', 'artist_id'],
     relations
+  )
+
+  console.log('Inserting track_albums...')
+
+  const albumRelations = []
+
+  tracks.forEach(track => {
+    track.albums.forEach(albumId => {
+      albumRelations.push({
+        track_id: track.id,
+        album_id: albumId
+      })
+    })
+  })
+
+  await bulkInsert(
+    pool,
+    'track_albums',
+    ['track_id', 'album_id'],
+    albumRelations
   )
 }

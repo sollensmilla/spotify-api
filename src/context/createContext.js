@@ -7,7 +7,8 @@ import { AlbumService } from '../services/albumService.js'
 import { ArtistService } from '../services/artistService.js'
 import { UserService } from '../services/userService.js'
 
-import { createTrackArtistsLoader } from '../graphql/track/track.loader.js'
+import { createTrackArtistsLoader } from '../graphql/track/trackArtistLoader.js'
+import { createTrackAlbumsLoader } from '../graphql/track/trackAlbumLoader.js'
 import { createAlbumLoader } from '../graphql/album/album.loader.js'
 import { createArtistLoader } from '../graphql/artist/artist.loader.js'
 
@@ -24,7 +25,8 @@ export const createContext = ({ req, pool }) => {
   const loaders = {
     albumLoader: createAlbumLoader(pool),
     artistLoader: createArtistLoader(pool),
-    trackArtistsLoader: createTrackArtistsLoader(pool)
+    trackArtistsLoader: createTrackArtistsLoader(pool),
+    trackAlbumsLoader: createTrackAlbumsLoader(pool)
   }
 
   const user = authenticate(req)

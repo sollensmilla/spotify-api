@@ -25,7 +25,10 @@ export function transformData (rows) {
       energy: parseFloat(row.energy) || 0,
       acousticness: parseFloat(row.acousticness) || 0,
       instrumentalness: parseFloat(row.instrumentalness) || 0,
-      artists: []
+      spotify_id: row.track_id,
+      image_url: null,
+      artists: [],
+      albums: []
     }
 
     const artistNames = row.artists
@@ -66,17 +69,21 @@ export function transformData (rows) {
 
     const albumKey = `${row.album_name}-${row.artists}`
 
+    let albumId
     if (!albumMap.has(albumKey)) {
+      albumId = uuidv4()
       albumMap.set(albumKey, {
-        id: uuidv4(),
+        id: albumId,
         album_name: row.album_name,
         total_tracks: 1
       })
     } else {
-      albumMap.get(albumKey).total_tracks++
+      const album = albumMap.get(albumKey)
+      album.total_tracks++
+      albumId = album.id
     }
 
-    track.album_id = albumMap.get(albumKey).id
+    track.albums.push(albumId)
 
     tracks.push(track)
   })

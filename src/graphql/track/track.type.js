@@ -4,7 +4,7 @@ export const trackType = gql`
   type Track {
     id: ID!
     track_name: String!
-    album: Album
+    albums: [Album!]
     artists: [Artist!]
     track_genre: String
     duration_ms: Int
@@ -16,6 +16,8 @@ export const trackType = gql`
     energy: Float
     acousticness: Float
     instrumentalness: Float
+    spotify_id: String   
+    image_url: String    
   }
 
   type TrackPage {
@@ -25,7 +27,7 @@ export const trackType = gql`
     items: [Track!]!
   }
 
-   input TrackFilterInput {
+  input TrackFilterInput {
     name: String
     genre: String
     minPopularity: Int
@@ -42,29 +44,41 @@ export const trackType = gql`
     explicit: Boolean
   }
 
-extend type Query {
-  tracks(
-    filter: TrackFilterInput
-    limit: Int
-    offset: Int
-  ): TrackPage!
-  track(id: ID!): Track
-}
-
-extend type Mutation {
-  addTrack(
-    track_name: String!
-    album_id: ID
-    genre: String
-    popularity: Int
-  ): Track!
-
-  updateTrack(
-    id: ID!
+  input TrackInput {
     track_name: String
+    album_ids: [ID!]
+    track_genre: String
     popularity: Int
-  ): Track!
 
-  deleteTrack(id: ID!): Boolean!
-}
+    duration_ms: Int
+    tempo: Float
+    danceability: Float
+    energy: Float
+    acousticness: Float
+    instrumentalness: Float
+    key: Int
+    explicit: Boolean
+  }
+
+  extend type Query {
+    tracks(
+      filter: TrackFilterInput
+      limit: Int
+      offset: Int
+    ): TrackPage!
+
+    track(id: ID!): Track
+    genres: [String!]!
+  }
+
+  extend type Mutation {
+    addTrack(input: TrackInput!): Track!
+
+    updateTrack(
+      id: ID!
+      input: TrackInput!
+    ): Track!
+
+    deleteTrack(id: ID!): Boolean!
+  }
 `

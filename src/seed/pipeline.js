@@ -15,7 +15,7 @@ export async function runPipeline (csvPath) {
   console.log('Transforming data...')
   const data = transformData(rows)
 
-  console.log('Creating table for users...')
+  console.log('Creating tables...')
   await createTables(pool)
 
   console.log('Clearing tables...')

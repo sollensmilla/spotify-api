@@ -31,7 +31,6 @@ export async function createTables (pool) {
     CREATE TABLE IF NOT EXISTS tracks (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       track_name TEXT NOT NULL,
-      album_id UUID REFERENCES albums(id) ON DELETE SET NULL,
       track_genre TEXT,
       duration_ms INTEGER,
       popularity INTEGER,
@@ -41,7 +40,9 @@ export async function createTables (pool) {
       danceability DOUBLE PRECISION,
       energy DOUBLE PRECISION,
       acousticness DOUBLE PRECISION,
-      instrumentalness DOUBLE PRECISION
+      instrumentalness DOUBLE PRECISION,
+      spotify_id TEXT,
+      image_url TEXT
     );
   `)
 
@@ -83,6 +84,26 @@ export async function createTables (pool) {
   await pool.query(`
   CREATE INDEX IF NOT EXISTS idx_track_artists_track
   ON track_artists(track_id);
+`)
+
+  await pool.query(`
+  CREATE TABLE IF NOT EXISTS track_albums (
+    track_id UUID NOT NULL,
+    album_id UUID NOT NULL,
+    PRIMARY KEY (track_id, album_id),
+    FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE,
+    FOREIGN KEY (album_id) REFERENCES albums(id) ON DELETE CASCADE
+  );
+`)
+
+  await pool.query(`
+  CREATE INDEX IF NOT EXISTS idx_track_albums_track
+  ON track_albums(track_id);
+`)
+
+  await pool.query(`
+  CREATE INDEX IF NOT EXISTS idx_track_albums_album
+  ON track_albums(album_id);
 `)
 
   await pool.query(`

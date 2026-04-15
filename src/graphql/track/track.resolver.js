@@ -8,19 +8,25 @@ export const trackResolver = {
       services.trackService.getTracks(args),
 
     track: (_, { id }, { services }) =>
-      services.trackService.getTrack(id)
+      services.trackService.getTrack(id),
+
+    genres: (_, __, { services }) =>
+      services.trackService.getGenres()
   },
 
   Mutation: {
 
-    addTrack: (_, args, { services, user }) => {
+    addTrack: (_, { input }, { services, user }) => {
       requireAuth(user)
-      return services.trackService.addTrack(args)
+      return services.trackService.addTrack(input)
     },
 
-    updateTrack: (_, args, { services, user }) => {
+    updateTrack: (_, { id, input }, { services, user }) => {
       requireAuth(user)
-      return services.trackService.updateTrack(args)
+      return services.trackService.updateTrack({
+        id,
+        ...input
+      })
     },
 
     deleteTrack: (_, { id }, { services, user }) => {
@@ -30,10 +36,12 @@ export const trackResolver = {
   },
 
   Track: {
-    album: (track, _, { loaders }) =>
-      loaders.albumLoader.load(track.album_id),
+    albums: (track, _, { loaders }) =>
+      loaders.trackAlbumsLoader.load(track.id),
 
     artists: (track, _, { loaders }) =>
-      loaders.trackArtistsLoader.load(track.id)
+      loaders.trackArtistsLoader.load(track.id),
+
+    image_url: (track) => track.image_url
   }
 }

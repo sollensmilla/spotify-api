@@ -4,7 +4,10 @@
 
 import { requireRow } from '../utils/requireRow.js'
 import { UserInputError } from 'apollo-server-errors'
-import { assertString, assertNumber, assertBoolean, assertUUID } from '../utils/validation.js'
+import {
+  assertUUID,
+  validateTrackInput
+} from '../utils/validation.js'
 
 export class TrackService {
   constructor (pool) {
@@ -108,8 +111,7 @@ export class TrackService {
     }
 
     if (explicit != null) {
-      const explicitVal = assertBoolean(explicit, 'explicit')
-      values.push(explicitVal)
+      values.push(explicit)
       baseQuery += ` AND explicit = $${values.length}`
     }
 
@@ -123,10 +125,10 @@ export class TrackService {
     values.push(limit)
     values.push(offset)
 
-    const paginatedQuery =
-      `${baseQuery} LIMIT $${values.length - 1} OFFSET $${values.length}`
-
-    const res = await this.pool.query(paginatedQuery, values)
+    const res = await this.pool.query(
+      `${baseQuery} LIMIT $${values.length - 1} OFFSET $${values.length}`,
+      values
+    )
 
     return {
       total,
@@ -147,53 +149,103 @@ export class TrackService {
     return requireRow(res, 'Track not found')
   }
 
-  async addTrack ({ track_name, album_id, track_genre, popularity }) {
-    track_name = assertString(track_name, 'track_name', 1, 100)
-
-    if (album_id !== undefined) {
-      album_id = assertUUID(album_id, 'album_id')
+  async addTrack (input) {
+    if (!input.track_name) {
+      throw new UserInputError('track_name is required')
     }
 
-    if (track_genre !== undefined) {
-      track_genre = assertString(track_genre, 'track_genre', 1, 50)
-    }
+    const validated = validateTrackInput(input)
 
-    if (popularity !== undefined) {
-      popularity = assertNumber(popularity, 'popularity', 0, 100)
+    if (input.album_ids !== undefined) {
+      input.album_ids = input.album_ids.map(id => assertUUID(id, 'album_id'))
     }
 
     const res = await this.pool.query(
-      `INSERT INTO tracks (track_name, album_id, track_genre, popularity)
-         VALUES ($1,$2,$3,$4)
-         RETURNING *`,
-      [track_name, album_id, track_genre, popularity]
+      `INSERT INTO tracks (
+        track_name,
+        track_genre,
+        popularity,
+        duration_ms,
+        tempo,
+        danceability,
+        energy,
+        acousticness,
+        instrumentalness,
+        key,
+        explicit
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      RETURNING *`,
+      [
+        validated.track_name,
+        validated.track_genre,
+        validated.popularity,
+        validated.duration_ms,
+        validated.tempo,
+        validated.danceability,
+        validated.energy,
+        validated.acousticness,
+        validated.instrumentalness,
+        validated.key,
+        validated.explicit
+      ]
     )
 
-    return res.rows[0]
+    const track = res.rows[0]
+
+    if (input.album_ids?.length) {
+      for (const albumId of input.album_ids) {
+        await this.pool.query(
+          `INSERT INTO track_albums (track_id, album_id)
+           VALUES ($1, $2)`,
+          [track.id, albumId]
+        )
+      }
+    }
+
+    return track
   }
 
-  async updateTrack ({ id, track_name, popularity }) {
+  async updateTrack ({ id, ...input }) {
     if (!id) {
       throw new UserInputError('id is required')
     }
 
     id = assertUUID(id, 'id')
 
-    if (track_name !== undefined) {
-      track_name = assertString(track_name, 'track_name', 1, 100)
-    }
+    const validated = validateTrackInput(input)
 
-    if (popularity !== undefined) {
-      popularity = assertNumber(popularity, 'popularity', 0, 100)
+    if (Object.keys(validated).length === 0) {
+      throw new UserInputError('At least one field must be provided')
     }
 
     const res = await this.pool.query(
-      `UPDATE tracks
-         SET track_name = COALESCE($2, track_name),
-             popularity = COALESCE($3, popularity)
-         WHERE id = $1
-         RETURNING *`,
-      [id, track_name, popularity]
+      `UPDATE tracks SET
+        track_name = COALESCE($2, track_name),
+        popularity = COALESCE($3, popularity),
+        duration_ms = COALESCE($4, duration_ms),
+        tempo = COALESCE($5, tempo),
+        danceability = COALESCE($6, danceability),
+        energy = COALESCE($7, energy),
+        acousticness = COALESCE($8, acousticness),
+        instrumentalness = COALESCE($9, instrumentalness),
+        key = COALESCE($10, key),
+        explicit = COALESCE($11, explicit)
+      WHERE id = $1
+      RETURNING *`,
+      [
+        id,
+        validated.track_name,
+        validated.popularity,
+        validated.duration_ms,
+        validated.tempo,
+        validated.danceability,
+        validated.energy,
+        validated.acousticness,
+        validated.instrumentalness,
+        validated.key,
+        validated.explicit
+      ]
     )
 
     return requireRow(res, 'Track not found')
@@ -204,13 +256,24 @@ export class TrackService {
 
     const res = await this.pool.query(
       `DELETE FROM tracks
-         WHERE id=$1
-         RETURNING id`,
+       WHERE id=$1
+       RETURNING id`,
       [id]
     )
 
     requireRow(res, 'Track not found')
 
     return true
+  }
+
+  async getGenres () {
+    const res = await this.pool.query(`
+      SELECT DISTINCT track_genre 
+      FROM tracks
+      WHERE track_genre IS NOT NULL
+      ORDER BY track_genre ASC
+    `)
+
+    return res.rows.map(row => row.track_genre)
   }
 }

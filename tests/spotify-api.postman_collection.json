@@ -594,8 +594,8 @@
 									"    pm.expect(json.data.addTrack.id).to.exist;",
 									"});",
 									"",
-									"pm.test(\"Album is attached\", () => {",
-									"    pm.expect(json.data.addTrack.album).to.not.be.null;",
+									"pm.test(\"Album(s) is attached\", () => {",
+									"    pm.expect(json.data.addTrack.albums).to.be.an(\"array\"); pm.expect(json.data.addTrack.albums.length).to.be.greaterThan(0);",
 									"});",
 									"",
 									"pm.environment.set(\"trackId\", json.data.addTrack.id);"
@@ -631,7 +631,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"query\": \"mutation AddTrack($name: String!, $popularity: Int!, $albumId: ID!) { addTrack(track_name: $name, popularity: $popularity, album_id: $albumId) { id track_name popularity album { id album_name } } }\",\n  \"variables\": {\n    \"name\": \"{{trackName}}\",\n    \"popularity\": {{popularity}},\n    \"albumId\": \"{{albumId}}\"\n  }\n}",
+							"raw": "{\n  \"query\": \"mutation AddTrack($input: TrackInput!) { addTrack(input: $input) { id track_name popularity albums { id album_name } } }\",\n  \"variables\": {\n    \"input\": {\n      \"track_name\": \"{{trackName}}\",\n      \"popularity\": {{popularity}},\n      \"album_ids\": [\"{{albumId}}\"]\n    }\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -881,8 +881,8 @@
 									"    pm.expect(json.data.track).to.exist;",
 									"});",
 									"",
-									"pm.test(\"Album exists\", () => {",
-									"    pm.expect(json.data.track.album).to.not.be.null;",
+									"pm.test(\"Albums attached\", () => {",
+									"    pm.expect(json.data.track.albums).to.be.an(\"array\"); pm.expect(json.data.track.albums.length).to.be.greaterThan(0);",
 									"});",
 									"",
 									"pm.test(\"Artists is array\", () => {",
@@ -899,7 +899,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"query\": \"query ($id: ID!) { track(id: $id) { id track_name album { id album_name } artists { id artist_name } } }\",\n  \"variables\": {\n    \"id\": \"{{trackId}}\"\n  }\n}",
+							"raw": "{\n  \"query\": \"query ($id: ID!) { track(id: $id) { id track_name albums { id album_name } artists { id artist_name } } }\",\n  \"variables\": {\n    \"id\": \"{{trackId}}\"\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -981,7 +981,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"query\": \"query ($id: ID!) { track(id: $id) { id track_name album { id album_name } artists { id artist_name } } }\",\n  \"variables\": {\n    \"id\": \"00000000-0000-0000-0000-000000000000\"\n  }\n}",
+							"raw": "{\n  \"query\": \"query ($id: ID!) { track(id: $id) { id track_name albums { id album_name } artists { id artist_name } } }\",\n  \"variables\": {\n    \"id\": \"00000000-0000-0000-0000-000000000000\"\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1045,7 +1045,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"query\": \"mutation Update($id: ID!, $name: String!) { updateTrack(id: $id, track_name: $name) { id track_name } }\",\n  \"variables\": {\n    \"id\": \"{{trackId}}\",\n    \"name\": \"{{updatedTrackName}}\"\n  }\n}",
+							"raw": "{\n  \"query\": \"mutation UpdateTrack($id: ID!, $input: TrackInput!) { updateTrack(id: $id, input: $input) { id track_name } }\",\n  \"variables\": {\n    \"id\": \"{{trackId}}\",\n    \"input\": {\n      \"track_name\": \"{{updatedTrackName}}\"\n    }\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
