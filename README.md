@@ -3,7 +3,7 @@ This project is an assignment for the course **1DV627 - Webben som applikationsp
 
 **👉 For examiners:** <br/>
 The full assignment documentation (design decisions, architecture, etc.) can be found here: <br/>
-[Assigment documentation](./docs/assignment_documentation.md) .
+[Assigment documentation](./docs/assignment_documentation.md) 
 
 ## Table of Contents
 - [Overview](#overview)
