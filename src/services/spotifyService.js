@@ -34,32 +34,50 @@ export const getSpotifyToken = async () => {
   return cachedToken
 }
 
-export const getTrackImages = async (spotifyIds) => {
-  const uncached = spotifyIds.filter(id => !imageCache.has(id))
+export const getTrackImages = async (spotifyIds = []) => {
+  if (!spotifyIds.length) return {}
 
-  if (uncached.length > 0) {
-    const token = await getSpotifyToken()
+  const validIds = spotifyIds.filter(Boolean)
+  const uncached = validIds.filter(id => !imageCache.has(id))
 
-    const res = await fetch(
-      `https://api.spotify.com/v1/tracks?ids=${uncached.join(',')}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
+  try {
+    if (uncached.length > 0) {
+      const token = await getSpotifyToken()
+
+      const res = await fetch(
+        `https://api.spotify.com/v1/tracks?ids=${uncached.join(',')}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
+      )
+
+      if (!res.ok) {
+        console.error('Spotify API error:', res.status, await res.text())
+        return {}
       }
-    )
 
-    const data = await res.json()
+      const data = await res.json()
 
-    data.tracks.forEach(track => {
-      imageCache.set(track.id, track.album?.images?.[0]?.url)
-    })
+      if (data?.tracks?.length) {
+        data.tracks.forEach(track => {
+          imageCache.set(
+            track.id,
+            track.album?.images?.[0]?.url || null
+          )
+        })
+      }
+    }
+  } catch (err) {
+    console.error('Spotify fetch failed:', err)
+    return {}
   }
 
   const result = {}
 
-  spotifyIds.forEach(id => {
-    result[id] = imageCache.get(id)
+  validIds.forEach(id => {
+    result[id] = imageCache.get(id) || null
   })
 
   return result

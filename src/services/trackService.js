@@ -326,6 +326,8 @@ export class TrackService {
       image_url: images[t.spotify_id] || null
     }))
 
+    console.log('SPOTIFY IDS:', spotifyIds.length)
+
     return {
       genreCounts: genreCountsRes.rows,
       topTracks: enrichedTracks,
