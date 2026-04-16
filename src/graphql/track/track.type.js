@@ -69,6 +69,7 @@ export const trackType = gql`
 
     track(id: ID!): Track
     genres: [String!]!
+    analytics: Analytics! 
   }
 
   extend type Mutation {
@@ -81,4 +82,20 @@ export const trackType = gql`
 
     deleteTrack(id: ID!): Boolean!
   }
+
+  type Analytics {
+  genreCounts: [GenreCount!]!
+  topTracks: [Track!]!
+  topArtists: [TopArtist!]!
+}
+
+type GenreCount {
+  genre: String!
+  count: Int!
+}
+
+type TopArtist {
+  artist_name: String!
+  count: Int!
+}
 `

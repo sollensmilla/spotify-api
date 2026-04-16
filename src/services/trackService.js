@@ -276,4 +276,42 @@ export class TrackService {
 
     return res.rows.map(row => row.track_genre)
   }
+
+  async getAnalytics () {
+    const genreCountsQuery = `
+    SELECT track_genre AS genre, COUNT(*)::int AS count
+    FROM tracks
+    GROUP BY track_genre
+    ORDER BY count DESC
+    LIMIT 10;
+  `
+
+    const topTracksQuery = `
+    SELECT id, track_name, popularity
+    FROM tracks
+    ORDER BY popularity DESC
+    LIMIT 5;
+  `
+
+    const topArtistsQuery = `
+    SELECT a.artist_name, COUNT(*)::int AS count
+    FROM track_artists ta
+    JOIN artists a ON ta.artist_id = a.id
+    GROUP BY a.artist_name
+    ORDER BY count DESC
+    LIMIT 5;
+  `
+
+    const [genreCounts, topTracks, topArtists] = await Promise.all([
+      this.pool.query(genreCountsQuery),
+      this.pool.query(topTracksQuery),
+      this.pool.query(topArtistsQuery)
+    ])
+
+    return {
+      genreCounts: genreCounts.rows,
+      topTracks: topTracks.rows,
+      topArtists: topArtists.rows
+    }
+  }
 }

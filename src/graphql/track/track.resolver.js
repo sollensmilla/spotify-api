@@ -11,7 +11,10 @@ export const trackResolver = {
       services.trackService.getTrack(id),
 
     genres: (_, __, { services }) =>
-      services.trackService.getGenres()
+      services.trackService.getGenres(),
+
+    analytics: (_, __, { services }) =>
+      services.trackService.getAnalytics()
   },
 
   Mutation: {
