@@ -8,6 +8,7 @@ import {
   assertUUID,
   validateTrackInput
 } from '../utils/validation.js'
+import { getTrackImages } from './spotifyService.js'
 
 export class TrackService {
   constructor (pool) {
@@ -287,10 +288,10 @@ export class TrackService {
   `
 
     const topTracksQuery = `
-    SELECT id, track_name, popularity
+    SELECT id, track_name, popularity, spotify_id
     FROM tracks
     ORDER BY popularity DESC
-    LIMIT 5;
+    LIMIT 10;
   `
 
     const topArtistsQuery = `
@@ -299,19 +300,36 @@ export class TrackService {
     JOIN artists a ON ta.artist_id = a.id
     GROUP BY a.artist_name
     ORDER BY count DESC
-    LIMIT 5;
+    LIMIT 10;
   `
 
-    const [genreCounts, topTracks, topArtists] = await Promise.all([
+    const [genreCountsRes, topTracksRes, topArtistsRes] = await Promise.all([
       this.pool.query(genreCountsQuery),
       this.pool.query(topTracksQuery),
       this.pool.query(topArtistsQuery)
     ])
 
+    const topTracks = topTracksRes.rows
+
+    const spotifyIds = topTracks
+      .map(t => t.spotify_id)
+      .filter(Boolean)
+
+    let images = {}
+
+    if (spotifyIds.length > 0) {
+      images = await getTrackImages(spotifyIds)
+    }
+
+    const enrichedTracks = topTracks.map(t => ({
+      ...t,
+      image_url: images[t.spotify_id] || null
+    }))
+
     return {
-      genreCounts: genreCounts.rows,
-      topTracks: topTracks.rows,
-      topArtists: topArtists.rows
+      genreCounts: genreCountsRes.rows,
+      topTracks: enrichedTracks,
+      topArtists: topArtistsRes.rows
     }
   }
 }
