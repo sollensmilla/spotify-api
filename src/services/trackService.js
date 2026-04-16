@@ -311,6 +311,10 @@ export class TrackService {
 
     const topTracks = topTracksRes.rows
 
+    console.log('TOP TRACK SAMPLE:', topTracks[0])
+    console.log('ALL TOP TRACKS:', topTracks)
+    console.log('SPOTIFY IDS RAW:', topTracks.map(t => t.spotify_id))
+
     const spotifyIds = topTracks
       .map(t => t.spotify_id)
       .filter(Boolean)
