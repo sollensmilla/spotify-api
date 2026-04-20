@@ -7,29 +7,36 @@ import { v4 as uuidv4 } from 'uuid'
 export function transformData (rows) {
   const albumMap = new Map()
   const artistMap = new Map()
-  const tracks = []
+  const trackMap = new Map()
 
   rows.forEach((row) => {
-    const trackId = uuidv4()
+    const spotifyId = row.track_id
+    const popularity = parseInt(row.popularity) || 0
 
-    const track = {
-      id: trackId,
-      track_name: row.track_name,
-      track_genre: row.track_genre,
-      duration_ms: parseInt(row.duration_ms) || 0,
-      popularity: parseInt(row.popularity) || 0,
-      key: parseInt(row.key) || -1,
-      explicit: row.explicit?.toLowerCase() === 'true',
-      tempo: parseFloat(row.tempo) || 0,
-      danceability: parseFloat(row.danceability) || 0,
-      energy: parseFloat(row.energy) || 0,
-      acousticness: parseFloat(row.acousticness) || 0,
-      instrumentalness: parseFloat(row.instrumentalness) || 0,
-      spotify_id: row.track_id,
-      image_url: null,
-      artists: [],
-      albums: []
+    if (!trackMap.has(spotifyId)) {
+      trackMap.set(spotifyId, {
+        id: uuidv4(),
+        track_name: row.track_name,
+        track_genre: row.track_genre,
+        duration_ms: parseInt(row.duration_ms) || 0,
+        popularity,
+        key: parseInt(row.key) || -1,
+        explicit: row.explicit?.toLowerCase() === 'true',
+        tempo: parseFloat(row.tempo) || 0,
+        danceability: parseFloat(row.danceability) || 0,
+        energy: parseFloat(row.energy) || 0,
+        acousticness: parseFloat(row.acousticness) || 0,
+        instrumentalness: parseFloat(row.instrumentalness) || 0,
+        spotify_id: spotifyId,
+        image_url: null,
+        artists: new Set(),
+        albums: new Set()
+      })
     }
+
+    const track = trackMap.get(spotifyId)
+
+    track.popularity = Math.max(track.popularity, popularity)
 
     const artistNames = row.artists
       .split(';')
@@ -43,28 +50,26 @@ export function transformData (rows) {
           artist_name: artistName,
           genres: row.track_genre ? [row.track_genre] : [],
           total_tracks: 1,
-          average_popularity: parseFloat(row.popularity) || 0
+          average_popularity: popularity
         })
       } else {
         const artist = artistMap.get(artistName)
 
         artist.total_tracks++
 
-        const popularity = parseFloat(row.popularity) || 0
-
         artist.average_popularity =
-                    (artist.average_popularity * (artist.total_tracks - 1) + popularity) /
-                    artist.total_tracks
+          (artist.average_popularity * (artist.total_tracks - 1) + popularity) /
+          artist.total_tracks
 
         if (
           row.track_genre &&
-                    !artist.genres.includes(row.track_genre)
+          !artist.genres.includes(row.track_genre)
         ) {
           artist.genres.push(row.track_genre)
         }
       }
 
-      track.artists.push(artistMap.get(artistName).id)
+      track.artists.add(artistMap.get(artistName).id)
     })
 
     const albumKey = `${row.album_name}-${row.artists}`
@@ -83,10 +88,14 @@ export function transformData (rows) {
       albumId = album.id
     }
 
-    track.albums.push(albumId)
-
-    tracks.push(track)
+    track.albums.add(albumId)
   })
+
+  const tracks = Array.from(trackMap.values()).map(track => ({
+    ...track,
+    artists: Array.from(track.artists),
+    albums: Array.from(track.albums)
+  }))
 
   return {
     albums: [...albumMap.values()],

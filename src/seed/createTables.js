@@ -41,7 +41,7 @@ export async function createTables (pool) {
       energy DOUBLE PRECISION,
       acousticness DOUBLE PRECISION,
       instrumentalness DOUBLE PRECISION,
-      spotify_id TEXT,
+      spotify_id TEXT UNIQUE,
       image_url TEXT
     );
   `)
