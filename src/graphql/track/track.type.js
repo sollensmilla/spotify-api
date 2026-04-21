@@ -38,6 +38,8 @@ export const trackType = gql`
     maxEnergy: Float
     minAcousticness: Float
     maxAcousticness: Float
+    minInstrumentalness: Float
+    maxInstrumentalness: Float
     minTempo: Float
     maxTempo: Float
     key: Int
