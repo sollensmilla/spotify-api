@@ -128,7 +128,7 @@ export class TrackService {
 
     const res = await this.pool.query(
       `${baseQuery}
-   ORDER BY popularity DESC
+   ORDER BY RANDOM()
    LIMIT $${values.length - 1} OFFSET $${values.length}`,
       values
     )
