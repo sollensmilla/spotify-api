@@ -37,6 +37,8 @@ export class TrackService {
       maxEnergy,
       minAcousticness,
       maxAcousticness,
+      minInstrumentalness,
+      maxInstrumentalness,
       minTempo,
       maxTempo,
       key,
@@ -94,6 +96,16 @@ export class TrackService {
     if (maxAcousticness !== undefined) {
       values.push(maxAcousticness)
       baseQuery += ` AND acousticness <= $${values.length}`
+    }
+
+    if (minInstrumentalness !== undefined) {
+      values.push(minInstrumentalness)
+      baseQuery += ` AND instrumentalness >= $${values.length}`
+    }
+
+    if (maxInstrumentalness !== undefined) {
+      values.push(maxInstrumentalness)
+      baseQuery += ` AND instrumentalness <= $${values.length}`
     }
 
     if (minTempo !== undefined) {
