@@ -98,12 +98,12 @@ export class TrackService {
       baseQuery += ` AND acousticness <= $${values.length}`
     }
 
-    if (minInstrumentalness !== undefined) {
+    if (minInstrumentalness !== null) {
       values.push(minInstrumentalness)
       baseQuery += ` AND instrumentalness >= $${values.length}`
     }
 
-    if (maxInstrumentalness !== undefined) {
+    if (maxInstrumentalness !== null) {
       values.push(maxInstrumentalness)
       baseQuery += ` AND instrumentalness <= $${values.length}`
     }
