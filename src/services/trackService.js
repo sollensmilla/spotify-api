@@ -127,7 +127,9 @@ export class TrackService {
     values.push(offset)
 
     const res = await this.pool.query(
-      `${baseQuery} LIMIT $${values.length - 1} OFFSET $${values.length}`,
+      `${baseQuery}
+   ORDER BY popularity DESC
+   LIMIT $${values.length - 1} OFFSET $${values.length}`,
       values
     )
 
