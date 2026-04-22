@@ -292,50 +292,67 @@ export class TrackService {
     return res.rows.map(row => row.track_genre)
   }
 
-  async getAnalytics () {
+  async getAnalytics ({ minPopularity, maxPopularity } = {}) {
+    let where = 'WHERE 1=1'
+    const values = []
+
+    if (minPopularity != null) {
+      values.push(minPopularity)
+      where += ` AND popularity >= $${values.length}`
+    }
+
+    if (maxPopularity != null) {
+      values.push(maxPopularity)
+      where += ` AND popularity <= $${values.length}`
+    }
+
     const popularityBucketsQuery = `
-  SELECT
-    CASE
-      WHEN popularity <= 20 THEN '0-20'
-      WHEN popularity <= 40 THEN '21-40'
-      WHEN popularity <= 60 THEN '41-60'
-      WHEN popularity <= 80 THEN '61-80'
-      ELSE '81-100'
-    END AS bucket,
-    AVG(danceability)::float AS avg_danceability,
-    AVG(energy)::float AS avg_energy,
-    AVG(tempo)::float AS avg_tempo,
-    AVG(acousticness)::float AS avg_acousticness,
-    AVG(instrumentalness)::float AS avg_instrumentalness,
-    COUNT(*)::int AS count
-  FROM tracks
-  GROUP BY bucket
-  ORDER BY bucket;
+SELECT
+  CASE
+    WHEN popularity <= 20 THEN '0-20'
+    WHEN popularity <= 40 THEN '21-40'
+    WHEN popularity <= 60 THEN '41-60'
+    WHEN popularity <= 80 THEN '61-80'
+    ELSE '81-100'
+  END AS bucket,
+  AVG(danceability)::float AS avg_danceability,
+  AVG(energy)::float AS avg_energy,
+  AVG(tempo)::float AS avg_tempo,
+  AVG(acousticness)::float AS avg_acousticness,
+  AVG(instrumentalness)::float AS avg_instrumentalness,
+  COUNT(*)::int AS count
+FROM tracks
+${where}
+GROUP BY bucket
+ORDER BY bucket;
 `
 
     const genreCountsQuery = `
-    SELECT track_genre AS genre, COUNT(*)::int AS count
-    FROM tracks
-    GROUP BY track_genre
-    ORDER BY count DESC
-    LIMIT 10;
-  `
+SELECT track_genre AS genre, COUNT(*)::int AS count
+FROM tracks
+${where}
+GROUP BY track_genre
+ORDER BY count DESC
+LIMIT 10;
+`
 
     const topTracksQuery = `
-    SELECT id, track_name, popularity, spotify_id
-    FROM tracks
-    ORDER BY popularity DESC
-    LIMIT 10;
-  `
-
+SELECT id, track_name, popularity, spotify_id
+FROM tracks
+${where}
+ORDER BY popularity DESC
+LIMIT 10;
+`
     const topArtistsQuery = `
-    SELECT a.artist_name, COUNT(*)::int AS count
-    FROM track_artists ta
-    JOIN artists a ON ta.artist_id = a.id
-    GROUP BY a.artist_name
-    ORDER BY count DESC
-    LIMIT 10;
-  `
+SELECT a.artist_name, COUNT(*)::int AS count
+FROM track_artists ta
+JOIN artists a ON ta.artist_id = a.id
+JOIN tracks t ON t.id = ta.track_id
+${where}
+GROUP BY a.artist_name
+ORDER BY count DESC
+LIMIT 10;
+`
 
     const [popularityBucketsRes, genreCountsRes, topTracksRes, topArtistsRes] = await Promise.all([
       this.pool.query(popularityBucketsQuery),

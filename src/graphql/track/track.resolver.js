@@ -13,8 +13,8 @@ export const trackResolver = {
     genres: (_, __, { services }) =>
       services.trackService.getGenres(),
 
-    analytics: (_, __, { services }) =>
-      services.trackService.getAnalytics()
+    analytics: (_, args, { services }) =>
+      services.trackService.getAnalytics(args)
   },
 
   Mutation: {

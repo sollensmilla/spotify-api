@@ -71,7 +71,10 @@ export const trackType = gql`
 
     track(id: ID!): Track
     genres: [String!]!
-    analytics: Analytics! 
+analytics(
+  minPopularity: Int
+  maxPopularity: Int
+): Analytics!
   }
 
   extend type Mutation {
