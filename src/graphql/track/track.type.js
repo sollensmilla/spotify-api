@@ -89,6 +89,17 @@ export const trackType = gql`
   genreCounts: [GenreCount!]!
   topTracks: [Track!]!
   topArtists: [TopArtist!]!
+  popularityBuckets: [PopularityBucket!]! 
+}
+
+type PopularityBucket {
+  bucket: String!
+  avg_danceability: Float
+  avg_energy: Float
+  avg_tempo: Float
+  avg_acousticness: Float
+  avg_instrumentalness: Float
+  count: Int!
 }
 
 type GenreCount {
