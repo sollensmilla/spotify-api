@@ -139,10 +139,10 @@ export class TrackService {
     values.push(offset)
 
     const res = await this.pool.query(
-  `${baseQuery}
+      `${baseQuery}
    ORDER BY popularity DESC
    LIMIT $${values.length - 1} OFFSET $${values.length}`,
-  values
+      values
     )
 
     return {
@@ -293,6 +293,26 @@ export class TrackService {
   }
 
   async getAnalytics () {
+    const popularityBucketsQuery = `
+  SELECT
+    CASE
+      WHEN popularity <= 20 THEN '0-20'
+      WHEN popularity <= 40 THEN '21-40'
+      WHEN popularity <= 60 THEN '41-60'
+      WHEN popularity <= 80 THEN '61-80'
+      ELSE '81-100'
+    END AS bucket,
+    AVG(danceability)::float AS avg_danceability,
+    AVG(energy)::float AS avg_energy,
+    AVG(tempo)::float AS avg_tempo,
+    AVG(acousticness)::float AS avg_acousticness,
+    AVG(instrumentalness)::float AS avg_instrumentalness,
+    COUNT(*)::int AS count
+  FROM tracks
+  GROUP BY bucket
+  ORDER BY bucket;
+`
+
     const genreCountsQuery = `
     SELECT track_genre AS genre, COUNT(*)::int AS count
     FROM tracks
@@ -317,7 +337,8 @@ export class TrackService {
     LIMIT 10;
   `
 
-    const [genreCountsRes, topTracksRes, topArtistsRes] = await Promise.all([
+    const [popularityBucketsRes, genreCountsRes, topTracksRes, topArtistsRes] = await Promise.all([
+      this.pool.query(popularityBucketsQuery),
       this.pool.query(genreCountsQuery),
       this.pool.query(topTracksQuery),
       this.pool.query(topArtistsQuery)
@@ -349,7 +370,8 @@ export class TrackService {
     return {
       genreCounts: genreCountsRes.rows,
       topTracks: enrichedTracks,
-      topArtists: topArtistsRes.rows
+      topArtists: topArtistsRes.rows,
+      popularityBuckets: popularityBucketsRes.rows
     }
   }
 }
