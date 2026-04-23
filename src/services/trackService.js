@@ -352,7 +352,7 @@ JOIN artists a ON ta.artist_id = a.id
 JOIN tracks t ON t.id = ta.track_id
 ${where}
 GROUP BY a.artist_name
-ORDER BY count DESC
+ORDER BY average_popularity DESC
 LIMIT 10;
 `
 
