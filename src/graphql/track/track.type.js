@@ -113,5 +113,6 @@ type GenreCount {
 type TopArtist {
   artist_name: String!
   count: Int!
+  average_popularity: Float
 }
 `
