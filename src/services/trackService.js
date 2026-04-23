@@ -11,11 +11,11 @@ import {
 import { getTrackImages } from './spotifyService.js'
 
 export class TrackService {
-  constructor (pool) {
+  constructor(pool) {
     this.pool = pool
   }
 
-  async getTracks (args) {
+  async getTracks(args) {
     const {
       filter = {},
       limit = 20,
@@ -153,7 +153,7 @@ export class TrackService {
     }
   }
 
-  async getTrack (id) {
+  async getTrack(id) {
     id = assertUUID(id, 'id')
 
     const res = await this.pool.query(
@@ -164,7 +164,7 @@ export class TrackService {
     return requireRow(res, 'Track not found')
   }
 
-  async addTrack (input) {
+  async addTrack(input) {
     if (!input.track_name) {
       throw new UserInputError('track_name is required')
     }
@@ -220,7 +220,7 @@ export class TrackService {
     return track
   }
 
-  async updateTrack ({ id, ...input }) {
+  async updateTrack({ id, ...input }) {
     if (!id) {
       throw new UserInputError('id is required')
     }
@@ -265,7 +265,7 @@ export class TrackService {
     return requireRow(res, 'Track not found')
   }
 
-  async deleteTrack (id) {
+  async deleteTrack(id) {
     id = assertUUID(id, 'id')
 
     const res = await this.pool.query(
@@ -280,7 +280,7 @@ export class TrackService {
     return true
   }
 
-  async getGenres () {
+  async getGenres() {
     const res = await this.pool.query(`
       SELECT DISTINCT track_genre 
       FROM tracks
@@ -291,7 +291,7 @@ export class TrackService {
     return res.rows.map(row => row.track_genre)
   }
 
-  async getAnalytics ({ minPopularity, maxPopularity } = {}) {
+  async getAnalytics({ minPopularity, maxPopularity } = {}) {
     let where = 'WHERE 1=1'
     const values = []
 
@@ -343,7 +343,10 @@ ORDER BY popularity DESC
 LIMIT 10;
 `
     const topArtistsQuery = `
-SELECT a.artist_name, COUNT(*)::int AS count
+SELECT 
+  a.artist_name, 
+  COUNT(*)::int AS count,
+  AVG(t.popularity)::float AS average_popularity
 FROM track_artists ta
 JOIN artists a ON ta.artist_id = a.id
 JOIN tracks t ON t.id = ta.track_id
